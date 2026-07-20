@@ -8,7 +8,6 @@ on:
 permissions:
   contents: write
   packages: write
-  id-token: write
 
 jobs:
   release:
@@ -24,27 +23,17 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Publish to npm
-        run: npm run publish:npm
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Setup GitHub Packages registry
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          registry-url: "https://npm.pkg.github.com"
-      - run: npm run publish:github
-        name: Publish to GitHub Packages
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create GitHub Release
+      - name: Publish to GitHub Packages
+        shell: bash
         run: |
-          curl -L -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/RealMtrx/repoinsight/releases \
-            -d '{
-              "tag_name": "${{ github.ref_name }}",
-              "name": "${{ github.ref_name }}",
-              "generate_release_notes": true
-            }'
+          npm config set registry https://npm.pkg.github.com
+          npm config set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
+          npm publish
+          npm config delete registry
+          npm config delete //npm.pkg.github.com/:_authToken
+      - uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
