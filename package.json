@@ -1,6 +1,6 @@
 {
   "name": "repoinsight",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Understand any repository in seconds. A production-grade repository analyzer.",
   "keywords": [
     "repository",
