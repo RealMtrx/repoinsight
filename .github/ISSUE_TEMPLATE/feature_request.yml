@@ -1,5 +1,5 @@
 name: Feature Request
-description: Suggest an idea or enhancement for RepoLens
+description: Suggest an idea or enhancement for repoinsight
 title: "[Feature]: "
 labels: ["enhancement"]
 assignees: []
@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for suggesting an idea for RepoLens! Please describe your feature request clearly so we can evaluate it.
+        Thanks for suggesting an idea for repoinsight! Please describe your feature request clearly so we can evaluate it.
 
   - type: textarea
     id: problem
@@ -23,7 +23,7 @@ body:
     attributes:
       label: Describe the solution you'd like
       description: A clear and concise description of what you want to happen.
-      placeholder: RepoLens should support...
+      placeholder: repoinsight should support...
     validations:
       required: true
 

@@ -12,8 +12,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: RepoLens Version
-      description: What version of RepoLens are you using? Run `repolens version` to find out.
+      label: repoinsight Version
+      description: What version of repoinsight are you using? Run `repoinsight version` to find out.
       placeholder: e.g., 1.0.0
     validations:
       required: true
@@ -47,7 +47,7 @@ body:
     attributes:
       label: Bug Description
       description: A clear and concise description of what the bug is.
-      placeholder: The `repolens scan` command crashes when...
+      placeholder: The `repoinsight scan` command crashes when...
     validations:
       required: true
 
@@ -57,7 +57,7 @@ body:
       label: Reproduction Steps
       description: Steps to reproduce the behavior.
       placeholder: |
-        1. Run `repolens scan ./my-project`
+        1. Run `repoinsight scan ./my-project`
         2. Wait for analysis to complete
         3. See error...
     validations:

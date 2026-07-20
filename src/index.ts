@@ -81,7 +81,7 @@ program
   .command("html")
   .description("Generate an interactive HTML report")
   .argument("[directory]", "Directory to analyze", ".")
-  .argument("[output]", "Output file path (defaults to repolens-report.html)")
+  .argument("[output]", "Output file path (defaults to repoinsight-report.html)")
   .action(async (dir: string, output?: string) => {
     await htmlCommand(dir, output);
   });

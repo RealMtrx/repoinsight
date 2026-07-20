@@ -5,7 +5,7 @@ export type AnalysisOptions = z.infer<typeof AnalysisOptionsSchema>;
 
 export type ReportFormat = z.infer<typeof ReportFormatSchema>;
 
-export interface RepoLensConfig {
+export interface RepoInsightConfig {
   excludePatterns?: string[];
   maxFileSize?: number;
   scoreWeights?: ScoreWeights;

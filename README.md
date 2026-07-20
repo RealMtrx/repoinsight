@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/RealMtrx/repolens/main/assets/repolens-dark.svg">
-    <img alt="RepoLens" src="https://raw.githubusercontent.com/RealMtrx/repolens/main/assets/repolens-light.svg" width="400">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/RealMtrx/repoinsight/main/assets/repoinsight-dark.svg">
+    <img alt="repoinsight" src="https://raw.githubusercontent.com/RealMtrx/repoinsight/main/assets/repoinsight-light.svg" width="400">
   </picture>
 </p>
 
@@ -10,33 +10,33 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/repolens"><img src="https://img.shields.io/npm/v/repolens.svg?style=flat&logo=npm&label=version" alt="npm version"></a>
-  <a href="https://www.npmjs.com/package/repolens"><img src="https://img.shields.io/npm/dm/repolens.svg?style=flat&logo=npm" alt="npm downloads"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/RealMtrx/repolens.svg?style=flat" alt="MIT License"></a>
-  <a href="https://github.com/RealMtrx/repolens/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/RealMtrx/repolens/ci.yml?style=flat&logo=github" alt="CI status"></a>
-  <a href="https://codecov.io/gh/RealMtrx/repolens"><img src="https://img.shields.io/codecov/c/github/RealMtrx/repolens?style=flat&logo=codecov" alt="codecov"></a>
-  <a href="https://nodejs.org"><img src="https://img.shields.io/node/v/repolens?style=flat&logo=node.js" alt="node version"></a>
+  <a href="https://www.npmjs.com/package/repoinsight"><img src="https://img.shields.io/npm/v/repoinsight.svg?style=flat&logo=npm&label=version" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/repoinsight"><img src="https://img.shields.io/npm/dm/repoinsight.svg?style=flat&logo=npm" alt="npm downloads"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/RealMtrx/repoinsight.svg?style=flat" alt="MIT License"></a>
+  <a href="https://github.com/RealMtrx/repoinsight/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/RealMtrx/repoinsight/ci.yml?style=flat&logo=github" alt="CI status"></a>
+  <a href="https://codecov.io/gh/RealMtrx/repoinsight"><img src="https://img.shields.io/codecov/c/github/RealMtrx/repoinsight?style=flat&logo=codecov" alt="codecov"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/node/v/repoinsight?style=flat&logo=node.js" alt="node version"></a>
   <a href="https://www.typescriptlang.org"><img src="https://img.shields.io/badge/types-TypeScript-3178C6.svg?style=flat&logo=typescript" alt="TypeScript"></a>
-  <a href="https://github.com/RealMtrx/repolens/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" alt="PRs welcome"></a>
+  <a href="https://github.com/RealMtrx/repoinsight/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" alt="PRs welcome"></a>
 </p>
 
 ---
 
-RepoLens is a **production-grade CLI tool** that scans any local Git repository and produces a
+repoinsight is a **production-grade CLI tool** that scans any local Git repository and produces a
 detailed health report. It works **completely offline** — no API keys, no servers, no telemetry, no
 analytics. Point it at any directory and get an instant, actionable breakdown of your project's
 health.
 
 ---
 
-## Why RepoLens?
+## Why repoinsight?
 
 Every codebase accumulates issues over time. Unused dependencies pile up, hardcoded secrets leak
-into commits, documentation goes missing, and complexity spirals out of control. RepoLens gives
+into commits, documentation goes missing, and complexity spirals out of control. repoinsight gives
 developers and teams an **instant, objective health assessment** of any repository — no
 configuration, no setup, no signup.
 
-**Use RepoLens to:**
+**Use repoinsight to:**
 
 - **Audit** a new project before contributing
 - **Review** pull requests with automated insights
@@ -113,19 +113,19 @@ Dependencies, Security, Maintainability, Performance, and Code Quality.
 ### Global install (recommended)
 
 ```bash
-npm install -g repolens
+npm install -g repoinsight
 ```
 
 ### Local development dependency
 
 ```bash
-npm install --save-dev repolens
+npm install --save-dev repoinsight
 ```
 
 ### Run without installing
 
 ```bash
-npx repolens scan
+npx repoinsight scan
 ```
 
 ### System requirements
@@ -142,40 +142,40 @@ npx repolens scan
 
 ```bash
 # Scan the current directory
-repolens scan
+repoinsight scan
 
 # Scan a specific project
-repolens scan ./path/to/project
+repoinsight scan ./path/to/project
 ```
 
 ### Generate a health report
 
 ```bash
 # Detailed terminal report
-repolens report
+repoinsight report
 
 # Run diagnostics (focused on issues)
-repolens doctor
+repoinsight doctor
 ```
 
 ### Export reports
 
 ```bash
 # JSON format
-repolens json ./project report.json
+repoinsight json ./project report.json
 
 # Markdown format
-repolens markdown ./project report.md
+repoinsight markdown ./project report.md
 
 # HTML format (opens a full-page report)
-repolens html ./project report.html
+repoinsight html ./project report.html
 ```
 
 ### Help and version
 
 ```bash
-repolens --help
-repolens --version
+repoinsight --help
+repoinsight --version
 ```
 
 ---
@@ -185,7 +185,7 @@ repolens --version
 ### Basic scan output
 
 ```bash
-$ repolens scan ./my-project
+$ repoinsight scan ./my-project
 ```
 
 Displays a header with the project name and path, a summary card with file/folder/commit counts and
@@ -195,8 +195,8 @@ issues (secrets, TODOs, circular imports), and recommendations.
 ### HTML report
 
 ```bash
-$ repolens html ./my-project
-✓ HTML report saved to repolens-report.html
+$ repoinsight html ./my-project
+✓ HTML report saved to repoinsight-report.html
 ```
 
 Open the generated HTML file in any browser for a full interactive report with dark/light mode
@@ -205,7 +205,7 @@ toggle.
 ### CI integration
 
 ```bash
-$ repolens json ./project > report.json
+$ repoinsight json ./project > report.json
 ```
 
 The JSON output can be parsed in CI pipelines to enforce quality gates (e.g., fail the build if the
@@ -213,29 +213,11 @@ score drops below 60).
 
 ---
 
-## Screenshots
-
-<p align="center">
-  <em>Terminal output</em>
-</p>
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/RealMtrx/repolens/main/assets/screenshot-terminal.png" alt="Terminal report screenshot" width="700">
-</p>
-
-<p align="center">
-  <em>HTML report</em>
-</p>
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/RealMtrx/repolens/main/assets/screenshot-html.png" alt="HTML report screenshot" width="700">
-</p>
-
 ---
 
 ## Architecture
 
-RepoLens follows a clean layered architecture that separates concerns into distinct modules:
+repoinsight follows a clean layered architecture that separates concerns into distinct modules:
 
 ```
 src/
@@ -255,7 +237,7 @@ src/
 - **Composable analyzers** — Each analysis dimension is a separate module
 - **Pluggable reporters** — Adding a new output format requires only a new reporter class
 - **Zod validation** — All user inputs and configuration are validated at the boundary
-- **Score weighting** — Category weights are configurable via `repolens.config.json`
+- **Score weighting** — Category weights are configurable via `repoinsight.config.json`
 
 ---
 
@@ -293,7 +275,7 @@ src/
 - [ ] Configurable rule sets and ignore patterns
 - [ ] Offline dependency vulnerability lookup (local database)
 - [ ] GitHub Actions annotation output
-- [ ] `.repolensignore` file support
+- [ ] `.repoinsightignore` file support
 - [ ] Performance profiling and bottleneck detection
 
 ### v2.0 — Future
@@ -309,7 +291,7 @@ src/
 
 ## Configuration
 
-Create a `repolens.config.json` file in your project root to customize behavior:
+Create a `repoinsight.config.json` file in your project root to customize behavior:
 
 ```json
 {
@@ -339,8 +321,8 @@ guidelines.
 
 ```bash
 # Clone the repository
-git clone https://github.com/RealMtrx/repolens.git
-cd repolens
+git clone https://github.com/RealMtrx/repoinsight.git
+cd repoinsight
 
 # Install dependencies
 npm install
@@ -371,25 +353,25 @@ npm run lint
 
 ## FAQ
 
-### Does RepoLens send any data over the network?
+### Does repoinsight send any data over the network?
 
-No. RepoLens is fully offline. No API calls, no telemetry, no analytics, no phoning home. Your code
-never leaves your machine.
+No. repoinsight is fully offline. No API calls, no telemetry, no analytics, no phoning home. Your
+code never leaves your machine.
 
-### Does RepoLens require API keys or authentication?
+### Does repoinsight require API keys or authentication?
 
 No. Everything runs locally against your local file system.
 
-### Can RepoLens analyze remote GitHub repositories?
+### Can repoinsight analyze remote GitHub repositories?
 
-Not directly. Clone the repository first, then run `repolens scan` against the local clone. RepoLens
-analyzes whatever filesystem path you give it.
+Not directly. Clone the repository first, then run `repoinsight scan` against the local clone.
+repoinsight analyzes whatever filesystem path you give it.
 
-### What formats does RepoLens support for output?
+### What formats does repoinsight support for output?
 
 Terminal (default), JSON, Markdown, and HTML. Use the corresponding subcommand to choose the format.
 
-### Can I use RepoLens in CI/CD pipelines?
+### Can I use repoinsight in CI/CD pipelines?
 
 Yes. The JSON output format is designed for CI integration. Pipe the output to a file and parse it
 to enforce quality gates.
@@ -404,22 +386,22 @@ from 0–100 based on heuristics and weighted according to the configuration.
 
 ## License
 
-[MIT](LICENSE) &copy; 2026 RepoLens Contributors
+[MIT](LICENSE) &copy; 2026 Mtrx
 
 ---
 
 ## Support
 
-| Resource         | Link                                                                   |
-| ---------------- | ---------------------------------------------------------------------- |
-| Documentation    | [README](README.md)                                                    |
-| Issue Tracker    | [GitHub Issues](https://github.com/RealMtrx/repolens/issues)           |
-| Feature Requests | [GitHub Discussions](https://github.com/RealMtrx/repolens/discussions) |
-| Security         | [SECURITY.md](SECURITY.md)                                             |
-| Changelog        | [CHANGELOG.md](CHANGELOG.md)                                           |
+| Resource         | Link                                                                      |
+| ---------------- | ------------------------------------------------------------------------- |
+| Documentation    | [README](README.md)                                                       |
+| Issue Tracker    | [GitHub Issues](https://github.com/RealMtrx/repoinsight/issues)           |
+| Feature Requests | [GitHub Discussions](https://github.com/RealMtrx/repoinsight/discussions) |
+| Security         | [SECURITY.md](SECURITY.md)                                                |
+| Changelog        | [CHANGELOG.md](CHANGELOG.md)                                              |
 
 ---
 
 <p align="center">
-  <sub>Built with care by the RepoLens team &middot; Star us on <a href="https://github.com/RealMtrx/repolens">GitHub</a></sub>
+  <sub>Built by <a href="https://github.com/RealMtrx">Mtrx</a> &middot; Star us on <a href="https://github.com/RealMtrx/repoinsight">GitHub</a></sub>
 </p>

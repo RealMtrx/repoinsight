@@ -1,9 +1,9 @@
 import { SCORE_WEIGHTS_DEFAULT } from "../constants/index.js";
-import type { RepoLensConfig, ScoreWeights } from "../types/index.js";
+import type { RepoInsightConfig, ScoreWeights } from "../types/index.js";
 
-let config: RepoLensConfig = {};
+let config: RepoInsightConfig = {};
 
-export function loadConfig(userConfig?: Partial<RepoLensConfig>): RepoLensConfig {
+export function loadConfig(userConfig?: Partial<RepoInsightConfig>): RepoInsightConfig {
   config = {
     excludePatterns: userConfig?.excludePatterns,
     maxFileSize: userConfig?.maxFileSize,
@@ -12,7 +12,7 @@ export function loadConfig(userConfig?: Partial<RepoLensConfig>): RepoLensConfig
   return config;
 }
 
-export function getConfig(): RepoLensConfig {
+export function getConfig(): RepoInsightConfig {
   return config;
 }
 

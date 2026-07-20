@@ -1,6 +1,6 @@
-# Contributing to RepoLens
+# Contributing to repoinsight
 
-Thank you for considering contributing to RepoLens. This document outlines the guidelines for
+Thank you for considering contributing to repoinsight. This document outlines the guidelines for
 contributing, the development workflow, and the standards we uphold.
 
 ---
@@ -31,22 +31,22 @@ Please report unacceptable behavior to the maintainers.
 ### Reporting Bugs
 
 Before submitting a bug report, check the
-[issue tracker](https://github.com/RealMtrx/repolens/issues) to see if the issue has already been
+[issue tracker](https://github.com/RealMtrx/repoinsight/issues) to see if the issue has already been
 reported. If not, open a new issue using the
-[bug report template](https://github.com/RealMtrx/repolens/issues/new?template=bug_report.yml).
+[bug report template](https://github.com/RealMtrx/repoinsight/issues/new?template=bug_report.yml).
 
 **A great bug report includes:**
 
 - A clear, descriptive title
 - Steps to reproduce the issue
 - Expected and actual behavior
-- Environment details (OS, Node.js version, RepoLens version)
+- Environment details (OS, Node.js version, repoinsight version)
 - Screenshots or error logs if applicable
 
 ### Suggesting Features
 
 Open a new issue using the
-[feature request template](https://github.com/RealMtrx/repolens/issues/new?template=feature_request.yml).
+[feature request template](https://github.com/RealMtrx/repoinsight/issues/new?template=feature_request.yml).
 Describe the feature, why it's useful, and how it should work.
 
 ### Improving Documentation
@@ -72,11 +72,11 @@ on a significant feature, please open an issue first to discuss it.
 
 ```bash
 # Fork and clone the repository
-git clone https://github.com/your-username/repolens.git
-cd repolens
+git clone https://github.com/your-username/repoinsight.git
+cd repoinsight
 
 # Add the upstream remote
-git remote add upstream https://github.com/RealMtrx/repolens.git
+git remote add upstream https://github.com/RealMtrx/repoinsight.git
 
 # Install dependencies
 npm install
@@ -92,7 +92,7 @@ npm run all
 
 ## Project Architecture
 
-RepoLens follows a clean layered architecture:
+repoinsight follows a clean layered architecture:
 
 ```
 src/
@@ -257,5 +257,5 @@ This project follows [Semantic Versioning](https://semver.org/):
 ## Questions?
 
 If you have questions about contributing, open a
-[Discussion](https://github.com/RealMtrx/repolens/discussions) or reach out to the maintainers on
+[Discussion](https://github.com/RealMtrx/repoinsight/discussions) or reach out to the maintainers on
 the issue tracker.

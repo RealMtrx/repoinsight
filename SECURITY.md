@@ -9,8 +9,8 @@
 
 ## Reporting a Vulnerability
 
-We take the security of RepoLens seriously. If you believe you have found a security vulnerability,
-please report it to us through coordinated disclosure.
+We take the security of repoinsight seriously. If you believe you have found a security
+vulnerability, please report it to us through coordinated disclosure.
 
 **Please do not report security vulnerabilities through public GitHub issues, discussions, or pull
 requests.**
@@ -18,7 +18,7 @@ requests.**
 Instead, send a detailed report to the maintainers via email, or use GitHub's private vulnerability
 reporting feature at:
 
-[https://github.com/RealMtrx/repolens/security/advisories](https://github.com/RealMtrx/repolens/security/advisories)
+[https://github.com/RealMtrx/repoinsight/security/advisories](https://github.com/RealMtrx/repoinsight/security/advisories)
 
 ### What to include
 
@@ -37,7 +37,7 @@ reporting feature at:
 
 ## Scope
 
-Security vulnerabilities in RepoLens itself (the CLI tool and its source code) are in scope. This
+Security vulnerabilities in repoinsight itself (the CLI tool and its source code) are in scope. This
 includes:
 
 - Code execution vulnerabilities
@@ -47,9 +47,9 @@ includes:
 
 ## Out of scope
 
-- Vulnerabilities in repositories analyzed by RepoLens
+- Vulnerabilities in repositories analyzed by repoinsight
 - Social engineering of project maintainers
-- Attacks requiring physical access to the machine running RepoLens
+- Attacks requiring physical access to the machine running repoinsight
 
 ## Safe Harbor
 

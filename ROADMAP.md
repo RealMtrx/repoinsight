@@ -1,7 +1,7 @@
 # Roadmap
 
-This document outlines the planned direction for RepoLens. Items are organized by release milestone
-and are subject to change based on community feedback and maintainer availability.
+This document outlines the planned direction for repoinsight. Items are organized by release
+milestone and are subject to change based on community feedback and maintainer availability.
 
 ---
 
@@ -22,11 +22,11 @@ The initial release focuses on comprehensive local repository analysis with mult
 ## v1.1 — Up next
 
 - [ ] **Configurable rule sets** — Allow users to define custom severity thresholds and ignore
-      patterns via `.repolensrc` or `repolens.config.json`
+      patterns via `.repoinsightrc` or `repoinsight.config.json`
 - [ ] **Offline vulnerability lookup** — Local database of known vulnerabilities for common packages
-      (updated via periodic `repolens update` command)
+      (updated via periodic `repoinsight update` command)
 - [ ] **GitHub Actions annotations** — Output report annotations directly in pull request diffs
-- [ ] **`.repolensignore` file** — Per-project exclusion patterns similar to `.gitignore`
+- [ ] **`.repoinsightignore` file** — Per-project exclusion patterns similar to `.gitignore`
 - [ ] **Performance profiling** — Detect slow functions, large bundles, and import bottlenecks
 - [ ] **Incremental scanning** — Only analyze changed files since the last scan for large monorepos
 
@@ -67,8 +67,8 @@ The initial release focuses on comprehensive local repository analysis with mult
 
 - **Vote on issues** — Add a thumbs-up reaction on GitHub issues you want to see prioritized
 - **Submit feature requests** — Use the
-  [feature request template](https://github.com/RealMtrx/repolens/issues/new?template=feature_request.yml)
+  [feature request template](https://github.com/RealMtrx/repoinsight/issues/new?template=feature_request.yml)
 - **Open a discussion** — Start a conversation in
-  [GitHub Discussions](https://github.com/RealMtrx/repolens/discussions)
+  [GitHub Discussions](https://github.com/RealMtrx/repoinsight/discussions)
 - **Contribute code** — PRs are welcome for any unplanned feature; open an issue first to discuss
   scope

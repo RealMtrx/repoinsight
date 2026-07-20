@@ -15,7 +15,7 @@ describe("AnalyzerEngine Integration", () => {
     const engine = new AnalyzerEngine(defaultOptions.toObject());
     const report = await engine.analyze(projectRoot);
 
-    expect(report.projectName).toBe("repolens");
+    expect(report.projectName).toBe(path.basename(projectRoot));
     expect(report.projectPath).toBe(projectRoot);
     expect(report.duration).toBeGreaterThan(0);
     expect(report.score).toBeDefined();

@@ -5,7 +5,7 @@ export class MarkdownReporter {
   render(report: AnalysisReport): string {
     const sections: string[] = [];
 
-    sections.push(`# RepoLens Report: ${report.projectName}\n`);
+    sections.push(`# repoinsight Report: ${report.projectName}\n`);
     sections.push(`> Generated at ${report.analyzedAt} | Duration: ${String(report.duration)}ms\n`);
 
     sections.push(this.renderSummary(report));

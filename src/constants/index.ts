@@ -1,4 +1,4 @@
-export const APP_NAME = "RepoLens";
+export const APP_NAME = "repoinsight";
 export const APP_VERSION = "1.0.0";
 export const APP_DESCRIPTION = "Understand any repository in seconds.";
 

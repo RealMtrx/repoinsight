@@ -1,5 +1,5 @@
 {
-  "name": "repolens",
+  "name": "repoinsight",
   "version": "1.0.0",
   "description": "Understand any repository in seconds. A production-grade repository analyzer.",
   "keywords": [
@@ -13,8 +13,9 @@
   ],
   "license": "MIT",
   "author": {
-    "name": "RepoLens Contributors",
-    "url": "https://github.com/RealMtrx/repolens"
+    "name": "Mtrx",
+    "url": "https://github.com/RealMtrx",
+    "discord": "0hu2"
   },
   "type": "module",
   "main": "./dist/index.js",
@@ -26,7 +27,7 @@
     }
   },
   "bin": {
-    "repolens": "./bin/repolens.js"
+    "repoinsight": "./bin/repoinsight.js"
   },
   "files": [
     "bin",
@@ -34,7 +35,7 @@
     "README.md",
     "LICENSE"
   ],
-  "homepage": "https://github.com/RealMtrx/repolens#readme",
+  "homepage": "https://github.com/RealMtrx/repoinsight#readme",
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -90,9 +91,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/RealMtrx/repolens.git"
+    "url": "https://github.com/RealMtrx/repoinsight.git"
   },
   "bugs": {
-    "url": "https://github.com/RealMtrx/repolens/issues"
+    "url": "https://github.com/RealMtrx/repoinsight/issues"
   }
 }

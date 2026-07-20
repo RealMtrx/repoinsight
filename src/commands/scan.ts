@@ -140,7 +140,7 @@ export async function doctorCommand(dir?: string): Promise<void> {
     }
 
     console.log(`\n${"=".repeat(56)}`);
-    console.log(`  RepoLens Doctor — ${report.projectName}`);
+    console.log(`  repoinsight Doctor — ${report.projectName}`);
     console.log("=".repeat(56));
 
     const criticalCount = issues.filter((i) => i.type === "critical").length;
@@ -244,7 +244,7 @@ export async function htmlCommand(dir?: string, outputFile?: string): Promise<vo
       await writeFile(outputFile, output, "utf-8");
       console.log(`HTML report saved to ${outputFile}`);
     } else {
-      const filePath = "repolens-report.html";
+      const filePath = "repoinsight-report.html";
       await writeFile(filePath, output, "utf-8");
       console.log(`HTML report saved to ${filePath}`);
     }
