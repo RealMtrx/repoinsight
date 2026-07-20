@@ -17,6 +17,14 @@
     "url": "https://github.com/RealMtrx/repolens"
   },
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "bin": {
     "repolens": "./bin/repolens.js"
   },

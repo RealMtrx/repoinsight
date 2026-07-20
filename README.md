@@ -216,7 +216,7 @@ score drops below 60).
 ## Screenshots
 
 <p align="center">
-  <em>Terminal output example — add a screenshot here</em>
+  <em>Terminal output</em>
 </p>
 
 <p align="center">
@@ -224,7 +224,7 @@ score drops below 60).
 </p>
 
 <p align="center">
-  <em>HTML report example — add a screenshot here</em>
+  <em>HTML report</em>
 </p>
 
 <p align="center">
