@@ -240,9 +240,14 @@ export async function htmlCommand(dir?: string, outputFile?: string): Promise<vo
     const reporter = new HtmlReporter();
     const output = reporter.render(report);
 
-    const filePath = outputFile ?? "repolens-report.html";
-    await writeFile(filePath, output, "utf-8");
-    console.log(`HTML report saved to ${filePath}`);
+    if (outputFile) {
+      await writeFile(outputFile, output, "utf-8");
+      console.log(`HTML report saved to ${outputFile}`);
+    } else {
+      const filePath = "repolens-report.html";
+      await writeFile(filePath, output, "utf-8");
+      console.log(`HTML report saved to ${filePath}`);
+    }
   } catch (error) {
     spinner.fail("HTML report generation failed");
     throw error;

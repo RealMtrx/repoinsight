@@ -1,5 +1,6 @@
 import { Command } from "commander";
-import { APP_NAME, APP_DESCRIPTION } from "./constants/index.js";
+import { APP_NAME, APP_DESCRIPTION, APP_VERSION } from "./constants/index.js";
+import { loadConfig } from "./config/index.js";
 import {
   scanCommand,
   reportCommand,
@@ -11,10 +12,12 @@ import {
 
 const program = new Command();
 
+loadConfig();
+
 program
   .name(APP_NAME.toLowerCase())
   .description(APP_DESCRIPTION)
-  .version("1.0.0", "-v, --version", "Output the current version");
+  .version(APP_VERSION, "-v, --version", "Output the current version");
 
 program
   .command("scan")
