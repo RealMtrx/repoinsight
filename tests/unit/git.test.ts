@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { isGitRepository, getCommitCount, getBranchCount, getContributors } from "../../src/utils/git.js";
+import {
+  isGitRepository,
+  getCommitCount,
+  getBranchCount,
+  getContributors,
+} from "../../src/utils/git.js";
 
 describe("git utils", () => {
   const repoPath = process.cwd();

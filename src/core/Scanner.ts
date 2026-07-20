@@ -21,10 +21,9 @@ export class Scanner {
   private readonly excludeRegexes: RegExp[];
 
   constructor(options: AnalysisOptions) {
-    this.excludeRegexes = [
-      ...DEFAULT_EXCLUDE_PATTERNS,
-      ...options.excludePatterns,
-    ].map((p) => Scanner.patternToRegex(p));
+    this.excludeRegexes = [...DEFAULT_EXCLUDE_PATTERNS, ...options.excludePatterns].map((p) =>
+      Scanner.patternToRegex(p),
+    );
   }
 
   async scan(rootPath: string): Promise<ScanResult> {
@@ -71,12 +70,16 @@ export class Scanner {
       const fullPath = path.join(dirPath, name);
       const relativePath = path.relative(rootPath, fullPath);
 
-      if (this.shouldExclude(relativePath)) {continue;}
+      if (this.shouldExclude(relativePath)) {
+        continue;
+      }
 
       if (entry.isSymbolicLink()) {
         try {
           const realPath = await fs.realpath(fullPath);
-          if (linkSet.has(realPath)) {continue;}
+          if (linkSet.has(realPath)) {
+            continue;
+          }
           linkSet.add(realPath);
           const stat = await fs.stat(fullPath);
           if (stat.isDirectory()) {
@@ -112,7 +115,9 @@ export class Scanner {
       );
 
       for (const result of stats) {
-        if (!result) {continue;}
+        if (!result) {
+          continue;
+        }
         const { name, stat } = result;
         const relativePath = path.relative(rootPath, path.join(dirPath, name));
 
@@ -158,7 +163,9 @@ export class Scanner {
 
   private shouldExclude(relativePath: string): boolean {
     const cached = this.excludeCache.get(relativePath);
-    if (cached !== undefined) {return cached;}
+    if (cached !== undefined) {
+      return cached;
+    }
 
     const normalized = relativePath.replace(/\\/g, "/");
     for (const regex of this.excludeRegexes) {
@@ -188,14 +195,20 @@ export class Scanner {
     let current = path.resolve(startPath);
     const root = path.parse(current).root;
     while (true) {
-      if (current === root) {return startPath;}
+      if (current === root) {
+        return startPath;
+      }
       try {
-        if (existsSync(path.join(current, ".git"))) {return current;}
+        if (existsSync(path.join(current, ".git"))) {
+          return current;
+        }
       } catch {
         return startPath;
       }
       const parent = path.dirname(current);
-      if (parent === current) {return startPath;}
+      if (parent === current) {
+        return startPath;
+      }
       current = parent;
     }
   }

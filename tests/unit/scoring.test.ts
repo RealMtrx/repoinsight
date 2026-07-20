@@ -78,7 +78,11 @@ describe("calculateCategoryScores", () => {
   });
 
   it("calculates documentation score correctly with all docs present", () => {
-    const report = createMockReport({ missingReadme: false, missingLicense: false, documentationScore: 100 });
+    const report = createMockReport({
+      missingReadme: false,
+      missingLicense: false,
+      documentationScore: 100,
+    });
     const scores = calculateCategoryScores(report);
     const docScore = scores.find((s) => s.name === "documentation");
     expect(docScore).toBeDefined();
@@ -169,9 +173,7 @@ describe("calculateScore", () => {
       missingGitignore: true,
       missingTests: true,
       missingCi: true,
-      hardcodedSecrets: [
-        { file: "config.ts", line: 1, type: "aws-key", context: "AKIA..." },
-      ],
+      hardcodedSecrets: [{ file: "config.ts", line: 1, type: "aws-key", context: "AKIA..." }],
       circularImports: [{ file: "a.ts", chain: ["a.ts", "b.ts", "a.ts"] }],
       emptyFolders: ["empty"],
     });

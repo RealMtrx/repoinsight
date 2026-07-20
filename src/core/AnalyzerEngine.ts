@@ -272,9 +272,13 @@ export class AnalyzerEngine {
 
     for (const file of files) {
       const content = fileContents.get(file.path);
-      if (!content) {continue;}
+      if (!content) {
+        continue;
+      }
       const ext = path.extname(file.path);
-      if (![".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"].includes(ext)) {continue;}
+      if (![".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"].includes(ext)) {
+        continue;
+      }
       const imports = this.extractImports(content);
       importMap.set(file.path, imports);
     }
@@ -284,7 +288,9 @@ export class AnalyzerEngine {
       const resolved: string[] = [];
       for (const imp of imports) {
         const r = this.resolveImportPath(rootPath, filePath, imp);
-        if (r) {resolved.push(r);}
+        if (r) {
+          resolved.push(r);
+        }
       }
       resolvedMap.set(filePath, resolved);
     }
@@ -328,7 +334,9 @@ export class AnalyzerEngine {
     for (const ext of extensions) {
       const fullPath = resolved + ext;
       const relativePath = path.relative(rootPath, fullPath).replace(/\\/g, "/");
-      if (existsSync(fullPath)) {return relativePath;}
+      if (existsSync(fullPath)) {
+        return relativePath;
+      }
       const indexFile = path.join(resolved, `index${ext}`);
       if (existsSync(indexFile)) {
         return path.relative(rootPath, indexFile).replace(/\\/g, "/");
@@ -345,10 +353,16 @@ export class AnalyzerEngine {
     chain: string[],
   ): boolean {
     const resolved = resolvedMap.get(current);
-    if (!resolved) {return false;}
+    if (!resolved) {
+      return false;
+    }
     for (const imp of resolved) {
-      if (imp === target) {return true;}
-      if (imp === current) {continue;}
+      if (imp === target) {
+        return true;
+      }
+      if (imp === current) {
+        continue;
+      }
       if (!visited.has(imp)) {
         visited.add(imp);
         chain.push(imp);
@@ -366,7 +380,9 @@ export class AnalyzerEngine {
     const seen = new Set<string>();
     return cycles.filter((c) => {
       const key = c.file;
-      if (seen.has(key)) {return false;}
+      if (seen.has(key)) {
+        return false;
+      }
       seen.add(key);
       return true;
     });
@@ -377,7 +393,9 @@ export class AnalyzerEngine {
     const { rootPath, files, fileContents } = ctx;
     const packageJsonPath = path.join(rootPath, "package.json");
 
-    if (!existsSync(packageJsonPath)) {return issues;}
+    if (!existsSync(packageJsonPath)) {
+      return issues;
+    }
 
     try {
       const content = await readFile(packageJsonPath, "utf-8");
@@ -419,16 +437,19 @@ export class AnalyzerEngine {
 
       const knownPackages = new Set(Object.keys(dependencies));
       for (const [, content] of fileContents) {
-        const importRegex =
-          /(?:from\s+["']([^"']+)["']|require\s*\(\s*["']([^"']+)["']\s*\))/g;
+        const importRegex = /(?:from\s+["']([^"']+)["']|require\s*\(\s*["']([^"']+)["']\s*\))/g;
         let m: RegExpExecArray | null;
         while ((m = importRegex.exec(content)) !== null) {
           const specifier = m[1] ?? m[2];
-          if (!specifier) {continue;}
-          if (specifier.startsWith(".") || specifier.startsWith("/")) {continue;}
+          if (!specifier) {
+            continue;
+          }
+          if (specifier.startsWith(".") || specifier.startsWith("/")) {
+            continue;
+          }
           const pkgName = specifier.startsWith("@")
             ? specifier.split("/").slice(0, 2).join("/")
-            : specifier.split("/")[0] ?? specifier;
+            : (specifier.split("/")[0] ?? specifier);
           if (!knownPackages.has(pkgName)) {
             issues.push({
               name: pkgName,
@@ -459,7 +480,9 @@ export class AnalyzerEngine {
   }
 
   private analyzeGit(rootPath: string): GitStats | null {
-    if (!isGitRepository(rootPath)) {return null;}
+    if (!isGitRepository(rootPath)) {
+      return null;
+    }
 
     return {
       commitCount: getCommitCount(rootPath),
@@ -477,11 +500,15 @@ export class AnalyzerEngine {
     const regex = /\b(TODO|FIXME|HACK|XXX)\b[:\s]*(.*)$/gm;
 
     for (const [filePath, content] of fileContents) {
-      if (filePath.includes("node_modules")) {continue;}
+      if (filePath.includes("node_modules")) {
+        continue;
+      }
       const lines = content.split("\n");
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        if (!line) {continue;}
+        if (!line) {
+          continue;
+        }
         regex.lastIndex = 0;
         const match = regex.exec(line);
         if (match) {
@@ -537,11 +564,15 @@ export class AnalyzerEngine {
     ];
 
     for (const [filePath, content] of fileContents) {
-      if (filePath.includes("node_modules") || filePath.includes(".git")) {continue;}
+      if (filePath.includes("node_modules") || filePath.includes(".git")) {
+        continue;
+      }
       const lines = content.split("\n");
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        if (!line) {continue;}
+        if (!line) {
+          continue;
+        }
         for (const { type, regex } of patterns) {
           regex.lastIndex = 0;
           if (regex.test(line)) {
@@ -585,12 +616,16 @@ export class AnalyzerEngine {
 
     for (const [filePath, content] of fileContents) {
       const ext = path.extname(filePath);
-      if (!sourceExts.has(ext)) {continue;}
+      if (!sourceExts.has(ext)) {
+        continue;
+      }
       const lines = content.split("\n");
       for (let i = 0; i < lines.length - 5; i++) {
         const block = lines.slice(i, i + 6).join("\n");
         const key = this.hashBlock(block);
-        if (!key) {continue;}
+        if (!key) {
+          continue;
+        }
         const existing = seen.get(key);
         if (existing) {
           const isDifferentFile = existing.every((e) => e.path !== filePath);
@@ -613,7 +648,9 @@ export class AnalyzerEngine {
 
   private hashBlock(block: string): string | null {
     const normalized = block.replace(/^\s+/gm, "").replace(/\s+$/gm, "");
-    if (normalized.length < 30) {return null;}
+    if (normalized.length < 30) {
+      return null;
+    }
     let hash = 0;
     for (let i = 0; i < normalized.length; i++) {
       hash = (hash << 5) - hash + normalized.charCodeAt(i);
@@ -631,9 +668,13 @@ export class AnalyzerEngine {
 
     for (const file of files) {
       const ext = path.extname(file.path);
-      if (!sourceExts.has(ext)) {continue;}
+      if (!sourceExts.has(ext)) {
+        continue;
+      }
       const content = fileContents.get(file.path);
-      if (!content) {continue;}
+      if (!content) {
+        continue;
+      }
       const lines = content.split("\n");
       const codeLines = lines.filter(
         (l) => l.trim().length > 0 && !l.trim().startsWith("//") && !l.trim().startsWith("#"),
@@ -668,7 +709,9 @@ export class AnalyzerEngine {
     let complexity = 1;
     for (const regex of decisionPoints) {
       const matches = content.match(regex);
-      if (matches) {complexity += matches.length;}
+      if (matches) {
+        complexity += matches.length;
+      }
     }
     return complexity;
   }
