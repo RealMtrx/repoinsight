@@ -1,5 +1,5 @@
 export const APP_NAME = "repoinsight";
-export const APP_VERSION = "1.0.0";
+export const APP_VERSION = "1.0.1";
 export const APP_DESCRIPTION = "Understand any repository in seconds.";
 
 export const DEFAULT_EXCLUDE_PATTERNS = [

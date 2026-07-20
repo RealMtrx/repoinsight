@@ -8,4 +8,3 @@ docs/api/
 .DS_Store
 *.log
 *.tgz
-.npmrc
