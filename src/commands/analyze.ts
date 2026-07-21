@@ -1,23 +1,27 @@
 import { Command } from "commander";
 import { register } from "./registry.js";
 import type { CommandDefinition } from "./types.js";
+import { detectTarget } from "../utils/detectTarget.js";
 
 const def: CommandDefinition = {
   name: "analyze",
   aliases: ["a", "inspect"],
-  description: "Analyze repository health and structure",
-  helpText: "Perform a comprehensive analysis of the target repository",
+  description: "Analyze repository, directory, or file health and structure",
+  helpText:
+    "Perform a comprehensive analysis. Automatically detects whether the target is a file, directory, or repository root.",
   category: "Analysis",
   examples: [
-    { usage: "repoinsight analyze", description: "Analyze current directory" },
-    { usage: "repoinsight analyze ./path", description: "Analyze specific directory" },
+    { usage: "repoinsight analyze", description: "Analyze current repository" },
+    { usage: "repoinsight analyze ./src", description: "Analyze a specific directory" },
+    { usage: "repoinsight analyze ./src/index.ts", description: "Analyze a single file" },
+    { usage: "repoinsight analyze /path/to/repo", description: "Analyze a full repository" },
     { usage: "repoinsight analyze --json", description: "Output results as JSON" },
     { usage: "repoinsight analyze --html", description: "Generate HTML report" },
     { usage: "repoinsight analyze -o report.html", description: "Save report to file" },
   ],
   setup(cmd: Command) {
     cmd
-      .argument("[directory]", "target directory", ".")
+      .argument("[target]", "target path (file, directory, or repository)", ".")
       .option("--json", "output as JSON")
       .option("--html", "generate HTML report")
       .option("--md", "generate Markdown report")
@@ -36,13 +40,17 @@ export function analyzeCommand(cmd: Command): void {
 }
 
 export async function analyzeAction(
-  directory: string,
+  target: string,
   options: Record<string, unknown>,
 ): Promise<void> {
+  const scope = detectTarget(target);
+
   const { runAnalysis } = await import("../core/analyzer.js");
-  const report = await runAnalysis(directory, {
+  const report = await runAnalysis(target, {
     useCache: options.cache !== false,
     incremental: options.incremental === true,
+    scopeType: scope.type,
+    targetPath: scope.targetPath,
   });
 
   if (options.json) {

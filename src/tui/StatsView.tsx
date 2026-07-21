@@ -1,6 +1,7 @@
 import { Box, Text } from "ink";
 import type { AnalysisReport } from "../types/index.js";
 import { formatDuration } from "./utils.js";
+import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
 
 interface StatsViewProps {
   report: AnalysisReport;
@@ -19,6 +20,14 @@ export function StatsView({ report }: StatsViewProps) {
       >
         <Text bold color="#D4A017">
           {" "}Stats{" "}
+        </Text>
+        <Text>
+          <Text color="#8D99AE">Target  </Text>
+          <Text color="#D4A017">{scopeIcon(report.scope.type)} {scopeLabel(report.scope.type)}</Text>
+        </Text>
+        <Text>
+          <Text color="#8D99AE">Path    </Text>
+          <Text color="#64B5F6">{report.scope.targetPath}</Text>
         </Text>
         <DataRow
           label="Files"

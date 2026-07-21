@@ -29,6 +29,14 @@ export class AnalysisOptionsModel {
     return this.options.maxFileSize;
   }
 
+  get scopeType(): string {
+    return this.options.scopeType;
+  }
+
+  get targetPath(): string {
+    return this.options.targetPath;
+  }
+
   toObject(): AnalysisOptions {
     return { ...this.options };
   }

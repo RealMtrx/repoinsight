@@ -3,6 +3,7 @@ import type { AnalysisReport } from "../types/index.js";
 import { Header } from "./Header.js";
 import { icons } from "./symbols.js";
 import { formatDuration } from "./utils.js";
+import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
 
 interface ResultsViewProps {
   report: AnalysisReport;
@@ -78,6 +79,14 @@ function LangBar({ lang, files, total }: { lang: string; files: number; total: n
 function SummarySection({ report }: { report: AnalysisReport }) {
   return (
     <Box flexDirection="column">
+      <Text>
+        <Text color="#8D99AE">Target:   </Text>
+        <Text color="#D4A017">{scopeIcon(report.scope.type)} {scopeLabel(report.scope.type)}</Text>
+      </Text>
+      <Text>
+        <Text color="#8D99AE">Path:     </Text>
+        <Text color="#64B5F6">{report.scope.targetPath}</Text>
+      </Text>
       <Text>
         <Text color="#8D99AE">Score:    </Text>
         <ScoreColor score={report.score} />

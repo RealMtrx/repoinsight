@@ -1,5 +1,6 @@
 import type { AnalysisReport } from "../types/index.js";
 import { formatFileSize } from "../utils/file.js";
+import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
 
 const C = {
   bg: "#1A1A2E",
@@ -138,6 +139,7 @@ export class HtmlReporter {
     <div>
       <h1>${this.esc(report.projectName)}</h1>
       <div class="sub">${this.esc(report.projectPath)}</div>
+      <div class="sub" style="margin-top:4px;font-size:.85rem">${scopeIcon(report.scope.type)} ${scopeLabel(report.scope.type)} — ${this.esc(report.scope.targetPath)}</div>
       <div class="sub" style="margin-top:6px;font-size:.75rem">${report.analyzedAt} · ${report.duration}ms</div>
     </div>
   </div>

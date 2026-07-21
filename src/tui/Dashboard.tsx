@@ -2,11 +2,13 @@ import { Box, Text } from "ink";
 import { Header } from "./Header.js";
 import { CommandPalette } from "./CommandPalette.js";
 import type { PaletteItem, MenuItem } from "./actions.js";
-import type { DetectedTechnologies } from "../types/index.js";
+import type { DetectedTechnologies, AnalysisScope } from "../types/index.js";
+import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
 
 interface DashboardProps {
   directory: string;
   tech: DetectedTechnologies | null;
+  scope: AnalysisScope;
   menuItems: MenuItem[];
   selectedIndex: number;
   statusMessage: string;
@@ -21,6 +23,7 @@ interface DashboardProps {
 export function Dashboard({
   directory,
   tech,
+  scope,
   menuItems,
   selectedIndex,
   statusMessage,
@@ -50,6 +53,31 @@ export function Dashboard({
         width={68}
       >
         <Text bold color="#2A9D8F">
+          {" "}Analysis Target{" "}
+        </Text>
+        <Text>
+          <Text color="#8D99AE">  Type    </Text>
+          <Text color="#D4A017">{scopeIcon(scope.type)} {scopeLabel(scope.type)}</Text>
+        </Text>
+        <Text>
+          <Text color="#8D99AE">  Path    </Text>
+          <Text color="#64B5F6" bold>
+            {scope.targetPath.length > 50
+              ? "..." + scope.targetPath.slice(-47)
+              : scope.targetPath}
+          </Text>
+        </Text>
+      </Box>
+
+      <Box
+        flexDirection="column"
+        borderStyle="round"
+        borderColor="#4895EF"
+        paddingX={1}
+        marginBottom={1}
+        width={68}
+      >
+        <Text bold color="#4895EF">
           {" "}Repository{" "}
         </Text>
         <DataRow

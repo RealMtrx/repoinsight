@@ -19,11 +19,11 @@
 
 ## Features
 
-- **Interactive TUI** — keyboard-navigable terminal interface with repository overview
+- **Interactive TUI** — keyboard-navigable terminal interface with scope-aware analysis
 - **14 Commands** — analyze, doctor, report, init, config, fix, stats, graph, deps, licenses,
   security, cache, update, help
-- **Smart Detection** — auto-detects package manager, monorepo tools, frameworks, test runners,
-  CI/CD, linters, and more
+- **Path-Aware Analysis** — auto-detects whether the target is a file, directory, or repository root
+  and scopes the analysis accordingly CI/CD, linters, and more
 - **4 Report Formats** — terminal (ANSI), HTML (dark theme), Markdown, JSON
 - **Performance** — parallel file scanning, smart caching, incremental analysis
 - **Scoring** — 8-category health score with actionable recommendations
@@ -44,11 +44,13 @@ bun add -g repoinsight
 ## Quick Start
 
 ```bash
-# Analyze the current directory
+# Analyze the current repository
 repoinsight analyze
 
-# Analyze a specific path
+# Analyze a specific path (file, directory, or repository)
 repoinsight analyze ./path/to/project
+repoinsight analyze ./src
+repoinsight analyze ./src/index.ts
 
 # Generate HTML report
 repoinsight analyze --html
@@ -70,7 +72,7 @@ repoinsight
 
 | Command    | Aliases        | Description                          |
 | ---------- | -------------- | ------------------------------------ |
-| `analyze`  | `a`, `inspect` | Full repository analysis             |
+| `analyze`  | `a`, `inspect` | Path-aware repository analysis       |
 | `doctor`   | `d`, `checkup` | Repository health checkup            |
 | `report`   | `r`            | Generate report from cached analysis |
 | `init`     | `i`            | Initialize a new analysis            |
@@ -198,6 +200,19 @@ Run `repoinsight` without arguments to enter the Ink-based interactive terminal 
 ```
 repoinsight
 ```
+
+### Analysis Target
+
+The TUI automatically detects what you're analyzing and displays it clearly:
+
+| Target Type    | Icon | Example                |
+| -------------- | ---- | ---------------------- |
+| **File**       | 📄   | `./src/index.ts`       |
+| **Directory**  | 📁   | `./src`                |
+| **Repository** | 📦   | `.` or `/path/to/repo` |
+
+Scores and recommendations are scoped to the analyzed target. A single file analysis reports metrics
+for just that file; a directory analysis covers only that subtree.
 
 ### Keyboard Shortcuts
 

@@ -185,9 +185,17 @@ export interface DetectedTechnologies {
   hasChangesetsConfig: boolean;
 }
 
+export type ScopeType = "file" | "directory" | "repository";
+
+export interface AnalysisScope {
+  type: ScopeType;
+  targetPath: string;
+}
+
 export interface AnalysisReport {
   projectName: string;
   projectPath: string;
+  scope: AnalysisScope;
   analyzedAt: string;
   duration: number;
   summary: ReportSummary;

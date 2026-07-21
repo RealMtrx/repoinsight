@@ -7,6 +7,7 @@ import { AnalysisCache } from "./Cache.js";
 import type {
   AnalysisOptions,
   AnalysisReport,
+  AnalysisScope,
   ReportSummary,
   LanguageBreakdown,
   DuplicateFileName,
@@ -53,7 +54,131 @@ export class AnalyzerEngine {
     this.cache = options.useCache ? new AnalysisCache(process.cwd()) : null;
   }
 
-  async analyze(projectPath: string): Promise<AnalysisReport> {
+  async analyze(projectPath: string, scope?: AnalysisScope): Promise<AnalysisReport> {
+    const resolvedScope = scope ?? detectTarget(projectPath);
+
+    if (resolvedScope.type === "file") {
+      return this.analyzeSingleFile(resolvedScope.targetPath);
+    }
+
+    return this.analyzeDirectoryOrRepo(projectPath, resolvedScope);
+  }
+
+  private async analyzeSingleFile(filePath: string): Promise<AnalysisReport> {
+    const startTime = Date.now();
+    const absolutePath = path.resolve(filePath);
+    const parentDir = path.dirname(absolutePath);
+    const fileName = path.basename(absolutePath);
+
+    const stat = statSync(absolutePath);
+    const content = await readFile(absolutePath, "utf-8");
+    const ext = path.extname(absolutePath);
+
+    const fileInfo: FileInfo = {
+      path: fileName,
+      size: stat.size,
+      lines: countLines(content),
+      extension: ext,
+      isBinary: false,
+    };
+
+    const files = [fileInfo];
+    const fileContents = new Map<string, string>([[fileName, content]]);
+
+    const languages = this.analyzeLanguages(files);
+    const gitStats = this.analyzeGit(parentDir);
+    const technologies = new Detector(parentDir).detect();
+    const todoComments = this.findTodoComments(fileContents);
+    const hardcodedSecrets = this.findHardcodedSecrets(fileContents);
+    const complexity = this.analyzeComplexity(files, fileContents);
+
+    const projectSize = stat.size;
+
+    const summary: ReportSummary = {
+      totalFiles: 1,
+      totalFolders: 0,
+      totalSize: projectSize,
+      languages: languages.length,
+      contributors: gitStats?.contributorCount ?? 0,
+      commits: gitStats?.commitCount ?? 0,
+      branches: gitStats?.branchCount ?? 0,
+      issues: hardcodedSecrets.length,
+      warnings: todoComments.length,
+      errors: 0,
+      score: 0,
+    };
+
+    const intermediate: AnalysisReport = {
+      projectName: fileName,
+      projectPath: absolutePath,
+      scope: { type: "file", targetPath: absolutePath },
+      analyzedAt: new Date().toISOString(),
+      duration: Date.now() - startTime,
+      summary,
+      folderStructure: "",
+      technologies,
+      languages,
+      biggestFolders: [],
+      biggestFiles: [fileInfo],
+      fileCount: 1,
+      emptyFolders: [],
+      duplicateFileNames: [],
+      circularImports: [],
+      dependencyIssues: [],
+      gitStats,
+      todoComments,
+      hardcodedSecrets,
+      largeAssets: [],
+      binaryFiles: [],
+      envFiles: [],
+      duplicateCode: [],
+      complexity,
+      missingReadme: false,
+      missingLicense: false,
+      missingGitignore: false,
+      missingTests: false,
+      missingCi: false,
+      projectSize,
+      documentationScore: 0,
+      score: 0,
+      categoryScores: [],
+      recommendations: [],
+      warnings: [],
+      errors: [],
+    };
+
+    const report: AnalysisReport = {
+      ...intermediate,
+      categoryScores: calculateCategoryScores(intermediate),
+      recommendations: this.generateRecommendations({
+        missingReadme: false,
+        missingLicense: false,
+        missingGitignore: false,
+        missingTests: false,
+        missingCi: false,
+        emptyFolders: [],
+        duplicateFileNames: [],
+        circularImports: [],
+        dependencyIssues: [],
+        todoComments,
+        hardcodedSecrets,
+        largeAssets: [],
+        duplicateCode: [],
+        complexity,
+      }),
+    };
+
+    report.score = calculateScore(report);
+    summary.score = report.score;
+    report.summary = summary;
+
+    return report;
+  }
+
+  private async analyzeDirectoryOrRepo(
+    projectPath: string,
+    scope: AnalysisScope,
+  ): Promise<AnalysisReport> {
     const startTime = Date.now();
     const rootPath = path.resolve(projectPath);
 
@@ -72,7 +197,9 @@ export class AnalyzerEngine {
     const gitStats = this.analyzeGit(rootPath);
     const todoComments = this.findTodoComments(fileContents);
     const hardcodedSecrets = this.findHardcodedSecrets(fileContents);
-    const technologies = new Detector(rootPath).detect();
+
+    const detectorRoot = scope.type === "directory" ? rootPath : rootPath;
+    const technologies = new Detector(detectorRoot).detect();
     const largeAssets = this.findLargeAssets(files);
     const binaryFiles = files.filter((f) => f.isBinary).map((f) => f.path);
     const envFiles = this.findEnvFiles(files);
@@ -125,9 +252,12 @@ export class AnalyzerEngine {
 
     const folderStructure = await getDirectoryTree(rootPath, "", this.options.excludePatterns);
 
+    const scopeTarget = scope.targetPath ?? rootPath;
+
     const intermediate: AnalysisReport = {
       projectName: path.basename(rootPath),
       projectPath: rootPath,
+      scope: { type: scope.type, targetPath: scopeTarget },
       analyzedAt: new Date().toISOString(),
       duration: Date.now() - startTime,
       summary,
@@ -873,4 +1003,28 @@ export class AnalyzerEngine {
 
     return recommendations;
   }
+}
+
+function detectTarget(inputPath: string): AnalysisScope {
+  const resolved = path.resolve(inputPath);
+
+  if (!existsSync(resolved)) {
+    return { type: "repository", targetPath: resolved };
+  }
+
+  const stat = statSync(resolved);
+
+  if (stat.isFile()) {
+    return { type: "file", targetPath: resolved };
+  }
+
+  if (stat.isDirectory()) {
+    const gitDir = path.join(resolved, ".git");
+    if (existsSync(gitDir) && statSync(gitDir).isDirectory()) {
+      return { type: "repository", targetPath: resolved };
+    }
+    return { type: "directory", targetPath: resolved };
+  }
+
+  return { type: "repository", targetPath: resolved };
 }

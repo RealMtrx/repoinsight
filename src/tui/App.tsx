@@ -6,7 +6,8 @@ import { ResultsView } from "./ResultsView.js";
 import { StatsView } from "./StatsView.js";
 import { TUIErrorBoundary } from "./ErrorBoundary.js";
 import { Detector } from "../detection/index.js";
-import type { AnalysisReport, DetectedTechnologies } from "../types/index.js";
+import { detectTarget } from "../utils/detectTarget.js";
+import type { AnalysisReport, DetectedTechnologies, AnalysisScope } from "../types/index.js";
 import type { MenuItem } from "./actions.js";
 
 type View = "dashboard" | "progress" | "results" | "stats";
@@ -48,6 +49,7 @@ export default function App() {
   const [report, setReport] = useState<AnalysisReport | null>(null);
   const [statusMessage, setStatusMessage] = useState("Ready");
   const [resultsSection, setResultsSection] = useState(0);
+  const [analysisScope, setAnalysisScope] = useState<AnalysisScope>(() => detectTarget(directory));
 
   const [paletteVisible, setPaletteVisible] = useState(false);
   const [paletteQuery, setPaletteQuery] = useState("");
@@ -75,9 +77,15 @@ export default function App() {
     setView("progress");
     setIsRunning(true);
     setStatusMessage(statusMsg);
+    const scope = detectTarget(directory);
+    setAnalysisScope(scope);
     try {
       const mod = await import("../core/analyzer.js");
-      const result = await mod.runAnalysis(directory, { useCache: false });
+      const result = await mod.runAnalysis(directory, {
+        useCache: false,
+        scopeType: scope.type,
+        targetPath: scope.targetPath,
+      });
       setReport(result);
       setView(targetView);
       setResultsSection(0);
@@ -218,6 +226,7 @@ export default function App() {
           try {
             const detector = new Detector(directory);
             setTech(detector.detect());
+            setAnalysisScope(detectTarget(directory));
             setStatusMessage("Re-scanned");
           } catch {
             setStatusMessage("Re-scan failed");
@@ -250,7 +259,7 @@ export default function App() {
 
   return (
     <TUIErrorBoundary>
-      {view === "progress" && <ProgressView />}
+      {view === "progress" && <ProgressView scope={analysisScope} />}
       {view === "results" && report && (
         <ResultsView report={report} section={resultsSection} />
       )}
@@ -259,6 +268,7 @@ export default function App() {
         <Dashboard
           directory={directory}
           tech={tech}
+          scope={analysisScope}
           menuItems={menuItems}
           selectedIndex={menuIndex}
           statusMessage={statusMessage}

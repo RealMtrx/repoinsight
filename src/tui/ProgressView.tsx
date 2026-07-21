@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Box, Text } from "ink";
+import type { AnalysisScope } from "../types/index.js";
+import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
 
 const PHASES = [
   "Scanning file structure",
@@ -9,7 +11,11 @@ const PHASES = [
   "Generating insights",
 ];
 
-export function ProgressView() {
+interface ProgressViewProps {
+  scope?: AnalysisScope;
+}
+
+export function ProgressView({ scope }: ProgressViewProps) {
   const [t, setT] = useState(0);
   const startRef = useRef(Date.now());
 
@@ -30,8 +36,13 @@ export function ProgressView() {
   return (
     <Box flexDirection="column" alignItems="center" paddingY={4}>
       <Text color="#D4A017" bold>
-        ◈ Analyzing Repository
+        ◈ Analyzing{scope ? ` ${scopeLabel(scope.type)}` : " Repository"}
       </Text>
+      {scope && (
+        <Text color="#8D99AE">
+          {scopeIcon(scope.type)} {scope.targetPath}
+        </Text>
+      )}
       <Box marginTop={1}>
         <Text color="#3D405B">{"─".repeat(before)}</Text>
         <Text color="#D4A017">◆</Text>

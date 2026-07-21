@@ -7,6 +7,7 @@ function createMockReport(overrides?: Partial<AnalysisReport>): AnalysisReport {
   const base: AnalysisReport = {
     projectName: "test-project",
     projectPath: "/test/path",
+    scope: { type: "repository", targetPath: "/test/path" },
     analyzedAt: "2025-01-01T00:00:00.000Z",
     duration: 100,
     summary: {

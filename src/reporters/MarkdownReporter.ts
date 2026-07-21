@@ -1,11 +1,15 @@
 import type { AnalysisReport } from "../types/index.js";
 import { formatFileSize } from "../utils/file.js";
+import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
 
 export class MarkdownReporter {
   render(report: AnalysisReport): string {
     const s: string[] = [];
 
     s.push(`# ◆ repoinsight Report: ${report.projectName}\n`);
+    s.push(
+      `> ${scopeIcon(report.scope.type)} **${scopeLabel(report.scope.type)}** — ${report.scope.targetPath}\n`,
+    );
     s.push(`> ${report.projectPath} · ${report.analyzedAt} · ${report.duration}ms\n`);
 
     s.push(this.summary(report));

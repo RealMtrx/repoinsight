@@ -8,6 +8,8 @@ export const AnalysisOptionsSchema = z.object({
   maxFileSize: z.number().positive().default(10_485_760),
   useCache: z.boolean().default(true),
   incremental: z.boolean().default(false),
+  scopeType: z.string().default("repository"),
+  targetPath: z.string().default("."),
 });
 
 export const ReportFormatSchema = z.enum(["terminal", "json", "markdown", "html"]);

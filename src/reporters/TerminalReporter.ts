@@ -2,6 +2,7 @@ import Table from "cli-table3";
 import type { AnalysisReport, CategoryScore } from "../types/index.js";
 import { APP_NAME } from "../constants/index.js";
 import { formatFileSize } from "../utils/file.js";
+import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
 import { theme, styles, icons, severity } from "../tui/index.js";
 import { terminalWidth, repeat, formatDuration } from "../tui/utils.js";
 
@@ -27,12 +28,22 @@ export class TerminalReporter {
     const path = styles.dim(report.projectPath);
     const top = theme.border(repeat(icons.horizontal, w));
     const mid = `  ${styles.dim(repeat(" ", Math.max(0, Math.floor((w - styles.dim(path).length) / 2))))}${path}`;
-    return `\n${top}\n${styles.dim(repeat(" ", Math.max(0, Math.floor((w - title.length) / 2))))}${title}\n${mid}\n${top}`;
+    const scopeInfo = report.scope
+      ? `  ${scopeIcon(report.scope.type)} ${scopeLabel(report.scope.type)}`
+      : "";
+    return `\n${top}\n${styles.dim(repeat(" ", Math.max(0, Math.floor((w - title.length) / 2))))}${title}\n${mid}\n${scopeInfo}\n${top}`;
   }
 
   private renderSummaryCard(report: AnalysisReport): string {
     const s = report.summary;
-    const lines = [
+    const lines: string[] = [];
+    if (report.scope) {
+      lines.push(
+        `  ${scopeIcon(report.scope.type)} ${styles.label(scopeLabel(report.scope.type))}` +
+          `  ${styles.dim(report.scope.targetPath)}`,
+      );
+    }
+    lines.push(
       `${styles.label("Files:")}     ${styles.number(s.totalFiles)}`,
       `${styles.label("Folders:")}   ${styles.number(s.totalFolders)}`,
       `${styles.label("Size:")}      ${styles.number(formatFileSize(s.totalSize))}`,
@@ -40,7 +51,7 @@ export class TerminalReporter {
       `${styles.label("Commits:")}   ${styles.number(s.commits)}`,
       `${styles.label("Branches:")}  ${styles.number(s.branches)}`,
       `${styles.label("Score:")}     ${this.scoreColor(s.score)(`${s.score}/100`)}`,
-    ];
+    );
     return this.simpleBox(lines, " Summary ");
   }
 
