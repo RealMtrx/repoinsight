@@ -91,8 +91,8 @@ export class Screen {
 
   private handleInput(chunk: Buffer): void {
     const str = chunk.toString();
+
     if (str === "\x03") {
-      // Ctrl+C
       this.exit();
       process.exit(130);
     }
@@ -102,7 +102,13 @@ export class Screen {
     let meta = false;
     let shift = false;
 
-    if (str.length === 1) {
+    if (str === "\r" || str === "\n" || str === "\r\n") {
+      key = "Enter";
+    } else if (str === "\t") {
+      key = "Tab";
+    } else if (str === "\x7f" || str === "\b") {
+      key = "Backspace";
+    } else if (str.length === 1) {
       const code = str.charCodeAt(0);
       if (code < 32) {
         ctrl = true;
@@ -137,12 +143,6 @@ export class Screen {
       key = "Escape";
     } else if (str.startsWith("\x1b[") && str.endsWith("~")) {
       key = "F" + str.slice(2, -1);
-    } else if (str === "\r" || str === "\n") {
-      key = "Enter";
-    } else if (str === "\t") {
-      key = "Tab";
-    } else if (str === "\x7f" || str === "\b") {
-      key = "Backspace";
     } else if (str.startsWith("\x1b[") && str.endsWith("u")) {
       // kitty protocol CSI u
       const parts = str.slice(2, -1).split(";");
@@ -157,7 +157,6 @@ export class Screen {
     } else {
       return; // unknown sequence
     }
-
     for (const listener of this.listeners) {
       listener(key, ctrl, meta, shift);
     }

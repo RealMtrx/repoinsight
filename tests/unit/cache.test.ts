@@ -221,10 +221,7 @@ describe("AnalysisCache", () => {
 
     it("ignores cache with wrong version", () => {
       const cacheFile = join(root, ".repoinsight-cache.json");
-      writeFileSync(
-        cacheFile,
-        JSON.stringify({ version: 99, createdAt: "now", files: {} }),
-      );
+      writeFileSync(cacheFile, JSON.stringify({ version: 99, createdAt: "now", files: {} }));
       const cache2 = new AnalysisCache(root);
       expect(cache2.size).toBe(0);
     });

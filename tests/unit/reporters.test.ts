@@ -220,9 +220,7 @@ describe("TerminalReporter", () => {
 
   it("renders hardcoded secrets section when present", () => {
     const report = createMockReport({
-      hardcodedSecrets: [
-        { file: "config.ts", line: 5, type: "aws-key", context: "AKIA12345" },
-      ],
+      hardcodedSecrets: [{ file: "config.ts", line: 5, type: "aws-key", context: "AKIA12345" }],
     });
     reporter.render(report);
     const calls = consoleLogSpy.mock.calls.map((c) => c[0]).join("");
@@ -231,9 +229,7 @@ describe("TerminalReporter", () => {
 
   it("renders TODO comments section when present", () => {
     const report = createMockReport({
-      todoComments: [
-        { file: "index.ts", line: 42, type: "TODO", text: "fix this later" },
-      ],
+      todoComments: [{ file: "index.ts", line: 42, type: "TODO", text: "fix this later" }],
     });
     reporter.render(report);
     const calls = consoleLogSpy.mock.calls.map((c) => c[0]).join("");
@@ -281,7 +277,13 @@ describe("TerminalReporter", () => {
         contributorCount: 2,
         contributors: [],
         largestCommits: [
-          { hash: "abc", author: "dev", message: "big commit", filesChanged: 5, date: "2025-01-01" },
+          {
+            hash: "abc",
+            author: "dev",
+            message: "big commit",
+            filesChanged: 5,
+            date: "2025-01-01",
+          },
         ],
         firstCommitDate: "2024-01-01",
         lastCommitDate: "2025-01-01",
@@ -406,9 +408,7 @@ describe("MarkdownReporter", () => {
 
   it("contains hardcoded secrets when present", () => {
     const report = createMockReport({
-      hardcodedSecrets: [
-        { file: "config.ts", line: 5, type: "aws-key", context: "AKIA12345" },
-      ],
+      hardcodedSecrets: [{ file: "config.ts", line: 5, type: "aws-key", context: "AKIA12345" }],
     });
     const result = reporter.render(report);
     expect(result).toContain("Hardcoded Secrets");
@@ -416,9 +416,7 @@ describe("MarkdownReporter", () => {
 
   it("contains TODO comments when present", () => {
     const report = createMockReport({
-      todoComments: [
-        { file: "app.ts", line: 10, type: "TODO", text: "refactor" },
-      ],
+      todoComments: [{ file: "app.ts", line: 10, type: "TODO", text: "refactor" }],
     });
     const result = reporter.render(report);
     expect(result).toContain("TODO/FIXME");
