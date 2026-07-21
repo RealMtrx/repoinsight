@@ -193,12 +193,38 @@ The health score (0–100) is calculated from 8 categories:
 
 ## Interactive TUI
 
-Run `repoinsight` without arguments to enter the interactive terminal interface:
+Run `repoinsight` without arguments to enter the Ink-based interactive terminal interface:
 
-- Displays detected technologies and repository info
-- Keyboard-navigable menu (arrow keys / j/k)
-- Quick command launch with Enter
-- Search with `/`
+```
+repoinsight
+```
+
+### Keyboard Shortcuts
+
+| Key               | Action                    |
+| ----------------- | ------------------------- |
+| `↑`/`↓`           | Navigate menu             |
+| `Enter`           | Select / launch command   |
+| `Ctrl+K`          | Open command palette      |
+| `Ctrl+C`          | Quit (safety prompt)      |
+| `Esc`             | Back / close palette      |
+| `Tab`             | Cycle through menu items  |
+| `PageUp`/`PageDn` | Jump to first / last item |
+| `Q`               | Quit / back to dashboard  |
+| `R`               | Re-scan repository        |
+| `←`/`→`           | Navigate results sections |
+
+### Views
+
+- **Dashboard** — repository metadata, detected technologies, and action menu
+- **Progress** — animated scan indicator while analysis runs
+- **Results** — six-section detailed report (Summary, Scores, Languages, Technologies, Files &
+  Folders, Recommendations)
+- **Stats** — repository statistics with Git data
+- **Command Palette** — fuzzy-searchable quick commands (`Ctrl+K`)
+
+> The TUI includes a React error boundary that catches render crashes gracefully and displays a
+> user-friendly error message without crashing the terminal.
 
 ## API
 
@@ -240,7 +266,7 @@ src/
   detection/    — Technology detection engine
   models/       — Data models (AnalysisOptions, Report)
   reporters/    — Terminal, HTML, Markdown, JSON reporters
-  tui/          — Interactive TUI (Menu, Box, Layout, etc.)
+  tui/          — Interactive Ink TUI (App, Dashboard, ResultsView, etc.)
   types/        — TypeScript types and Zod schemas
   utils/        — File, git, scoring utilities
 tests/

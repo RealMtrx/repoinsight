@@ -1,40 +1,47 @@
 import { useEffect, useState, useRef } from "react";
 import { Box, Text } from "ink";
-import { createSpinnerFrames } from "./Progress.js";
+
+const PHASES = [
+  "Scanning file structure",
+  "Analyzing dependencies",
+  "Evaluating code quality",
+  "Checking Git history",
+  "Generating insights",
+];
 
 export function ProgressView() {
   const [t, setT] = useState(0);
   const startRef = useRef(Date.now());
 
   useEffect(() => {
-    const timer = setInterval(() => setT((x) => x + 1), 80);
+    const timer = setInterval(() => setT((x) => x + 1), 100);
     return () => clearInterval(timer);
   }, []);
 
-  const barWidth = 40;
-  const pos = ((t % 50) / 50) * (barWidth - 2);
+  const elapsed = ((Date.now() - startRef.current) / 1000).toFixed(1);
+  const phaseIndex = Math.floor(t / 25) % PHASES.length;
+  const dots = ".".repeat((t % 4) + 1);
+
+  const barWidth = 36;
+  const pos = ((t % 40) / 40) * (barWidth - 2);
   const before = Math.max(0, Math.floor(pos));
   const after = Math.max(0, barWidth - before - 1);
-  const elapsed = ((Date.now() - startRef.current) / 1000).toFixed(1);
-  const frame = createSpinnerFrames()[t % 4];
 
   return (
-    <Box flexDirection="column" alignItems="center" paddingY={3}>
+    <Box flexDirection="column" alignItems="center" paddingY={4}>
       <Text color="#D4A017" bold>
-        {frame} Analyzing Repository
+        ◈ Analyzing Repository
       </Text>
       <Box marginTop={1}>
         <Text color="#3D405B">{"─".repeat(before)}</Text>
-        <Text color="#D4A017">◇</Text>
+        <Text color="#D4A017">◆</Text>
         <Text color="#3D405B">{"─".repeat(after)}</Text>
       </Box>
-      <Box
-        marginTop={1}
-        flexDirection="column"
-        alignItems="center"
-      >
-        <Text color="#6C757D">Scanning codebase for insights...</Text>
-        <Text color="#8D99AE">Elapsed: {elapsed}s</Text>
+      <Box marginTop={1}>
+        <Text color="#8D99AE">{PHASES[phaseIndex]}{dots}</Text>
+      </Box>
+      <Box marginTop={1}>
+        <Text color="#6C757D">elapsed {elapsed}s</Text>
       </Box>
     </Box>
   );

@@ -18,10 +18,6 @@ interface DashboardProps {
   onPaletteSelect: (id: string) => void;
 }
 
-function renderLine(label: string, value: string): string {
-  return `  ${label.padEnd(18)}${value}`;
-}
-
 export function Dashboard({
   directory,
   tech,
@@ -36,7 +32,7 @@ export function Dashboard({
   onPaletteSelect,
 }: DashboardProps) {
   return (
-    <Box flexDirection="column" paddingX={2}>
+    <Box flexDirection="column" paddingX={1}>
       <Header
         tagline={
           statusMessage === "Ready"
@@ -49,80 +45,59 @@ export function Dashboard({
         flexDirection="column"
         borderStyle="round"
         borderColor="#2A9D8F"
-        paddingX={2}
+        paddingX={1}
         marginBottom={1}
+        width={68}
       >
         <Text bold color="#2A9D8F">
           {" "}Repository{" "}
         </Text>
-        <Text>
-          {renderLine(
-            "Directory",
+        <DataRow
+          label="Directory"
+          value={
             directory.length > 50
               ? "..." + directory.slice(-47)
-              : directory,
-          )}
-        </Text>
-        <Text>
-          {renderLine(
-            "Git",
-            tech?.git ? "✓ active" : "—",
-          )}
-        </Text>
+              : directory
+          }
+          color="#64B5F6"
+        />
+        <DataRow
+          label="Git"
+          value={tech?.git ? "active" : "—"}
+          color={tech?.git ? "#52B788" : "#6C757D"}
+        />
         {tech?.packageManager && (
-          <Text>
-            {renderLine(
-              "Package",
+          <DataRow
+            label="Package"
+            value={
               tech.packageManager +
-                (tech.packageManagerVersion
-                  ? ` ${tech.packageManagerVersion}`
-                  : ""),
-            )}
-          </Text>
+              (tech.packageManagerVersion
+                ? ` ${tech.packageManagerVersion}`
+                : "")
+            }
+            color="#D4A017"
+          />
         )}
         {tech?.frameworks.length ? (
-          <Text>
-            {renderLine(
-              "Framework",
-              tech.frameworks.join(", "),
-            )}
-          </Text>
+          <DataRow
+            label="Framework"
+            value={tech.frameworks.join(", ")}
+            color="#4895EF"
+          />
         ) : null}
-        {tech && (
-          <Text>
-            {renderLine(
-              "Language",
-              tech.typescript ? "TypeScript" : "JavaScript",
-            )}
-          </Text>
-        )}
-        {tech?.monorepo && (
-          <Text>
-            {renderLine("Monorepo", tech.monorepo)}
-          </Text>
-        )}
-        {tech?.nodeVersion && (
-          <Text>
-            {renderLine("Node.js", tech.nodeVersion)}
-          </Text>
-        )}
         {tech?.testFrameworks.length ? (
-          <Text>
-            {renderLine(
-              "Testing",
-              tech.testFrameworks.join(", "),
-            )}
-          </Text>
+          <DataRow
+            label="Testing"
+            value={tech.testFrameworks.join(", ")}
+            color="#F4A261"
+          />
         ) : null}
         {tech?.ciProviders.length ? (
-          <Text>
-            {renderLine("CI/CD", tech.ciProviders.join(", "))}
-          </Text>
-        ) : null}
-        {tech?.linters ? (
-          <Text>
-            {renderLine("Linters", tech.linters.join(", "))}
-          </Text>
+          <DataRow
+            label="CI/CD"
+            value={tech.ciProviders.join(", ")}
+            color="#E63946"
+          />
         ) : null}
       </Box>
 
@@ -131,26 +106,36 @@ export function Dashboard({
           flexDirection="column"
           borderStyle="round"
           borderColor="#D4A017"
-          paddingX={2}
+          paddingX={1}
           marginBottom={1}
+          width={68}
         >
           <Text bold color="#D4A017">
             {" "}Overview{" "}
           </Text>
-          <Text>
-            {(() => {
-              const has: string[] = [];
-              if (tech.hasReadme) {has.push("README");}
-              if (tech.hasLicense) {has.push("LICENSE");}
-              if (tech.hasSecurity) {has.push("SECURITY");}
-              if (tech.hasContributing) {has.push("CONTRIBUTING");}
-              if (tech.docker) {has.push("Docker");}
-              if (tech.changesets) {has.push("changesets");}
-              if (tech.workspaces) {has.push("workspaces");}
-              if (has.length === 0) {return "  —";}
-              return `  ${has.join(", ")}`;
-            })()}
-          </Text>
+          {(() => {
+            const items: string[] = [];
+            if (tech.hasReadme) { items.push("README"); }
+            if (tech.hasLicense) { items.push("LICENSE"); }
+            if (tech.hasSecurity) { items.push("SECURITY"); }
+            if (tech.hasContributing) { items.push("CONTRIBUTING"); }
+            if (tech.docker) { items.push("Docker"); }
+            if (tech.changesets) { items.push("changesets"); }
+            if (tech.workspaces) { items.push("workspaces"); }
+            if (tech.typescript) { items.push("TypeScript"); }
+            if (tech.monorepo) { items.push(`Monorepo (${tech.monorepo})`); }
+            if (tech.nodeVersion) { items.push(`Node ${tech.nodeVersion}`); }
+            if (items.length === 0) { return <Text color="#8D99AE">  — No detected features</Text>; }
+            return (
+              <Box flexDirection="row" flexWrap="wrap" gap={1}>
+                {items.map((item) => (
+                  <Text key={item} color="#2A9D8F">
+                    ◈ {item}
+                  </Text>
+                ))}
+              </Box>
+            );
+          })()}
         </Box>
       )}
 
@@ -168,8 +153,9 @@ export function Dashboard({
         flexDirection="column"
         borderStyle="round"
         borderColor="#3D405B"
-        paddingX={2}
+        paddingX={1}
         marginBottom={1}
+        width={68}
       >
         <Text bold color="#8D99AE">
           {" "}Actions{" "}
@@ -180,7 +166,7 @@ export function Dashboard({
 
           for (let i = 0; i < menuItems.length; i++) {
             const item = menuItems[i];
-            if (!item) {continue;}
+            if (!item) { continue; }
 
             if (item.category !== currentCategory) {
               currentCategory = item.category;
@@ -212,12 +198,29 @@ export function Dashboard({
         })()}
       </Box>
 
-      <Box justifyContent="space-between" width="100%">
+      <Box justifyContent="space-between" width={68}>
         <Text color="#6C757D">◈ repoinsight</Text>
         <Text color="#8D99AE">
-          ↑↓ Navigate · Enter Select · Ctrl+K Commands · R Re-scan · Q Quit
+          ↑↓ · Enter · Ctrl+K · R · Q
         </Text>
       </Box>
     </Box>
+  );
+}
+
+function DataRow({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: string;
+  color: string;
+}) {
+  return (
+    <Text>
+      <Text color="#8D99AE">  {label.padEnd(16)}</Text>
+      <Text color={color}>{value}</Text>
+    </Text>
   );
 }
