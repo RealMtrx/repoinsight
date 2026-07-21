@@ -60,7 +60,7 @@
     "cli-table3": "^0.6.5",
     "commander": "^13.1.0",
     "ora": "^8.2.0",
-    "zod": "^3.24.2"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.14.1",
