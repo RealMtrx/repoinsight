@@ -3,7 +3,6 @@ import type { AnalysisReport } from "../types/index.js";
 import { Header } from "./Header.js";
 import { icons } from "./symbols.js";
 import { formatDuration } from "./utils.js";
-import { createProgressBar } from "./Progress.js";
 
 interface ResultsViewProps {
   report: AnalysisReport;
@@ -16,104 +15,64 @@ interface SectionDef {
   render: (report: AnalysisReport) => React.ReactNode;
 }
 
-export function ResultsView({
-  report,
-  section,
-}: ResultsViewProps) {
-  const sections: SectionDef[] = [
-    {
-      label: "Summary",
-      icon: icons.diamond,
-      render: (r) => <SummarySection report={r} />,
-    },
-    {
-      label: "Score Breakdown",
-      icon: icons.chart,
-      render: (r) => <ScoresSection report={r} />,
-    },
-    {
-      label: "Languages",
-      icon: icons.file,
-      render: (r) => <LanguagesSection report={r} />,
-    },
-    {
-      label: "Technologies",
-      icon: icons.package,
-      render: (r) => <TechSection report={r} />,
-    },
-    {
-      label: "Files & Folders",
-      icon: icons.folder,
-      render: (r) => <FilesSection report={r} />,
-    },
-    {
-      label: "Recommendations",
-      icon: icons.flag,
-      render: (r) => <RecsSection report={r} />,
-    },
-  ];
-
-  const current = sections[section];
-  if (!current) {return null;}
-
-  const totalSections = sections.length;
-
-  return (
-    <Box flexDirection="column" paddingX={2}>
-      <Header tagline="Analysis Complete" compact />
-      <Box
-        flexDirection="column"
-        borderStyle="round"
-        borderColor="#2A9D8F"
-        paddingX={1}
-        marginBottom={1}
-      >
-        <Text bold color="#2A9D8F">
-          {" "}Sections{" "}
-        </Text>
-        <Box gap={2}>
-          {sections.map((s, i) => (
-            <Text
-              key={s.label}
-              color={i === section ? "#D4A017" : "#8D99AE"}
-              bold={i === section}
-            >
-              {i === section ? `${icons.arrow} ` : "  "}
-              {s.label}
-            </Text>
-          ))}
-        </Box>
-      </Box>
-      <Box
-        flexDirection="column"
-        borderStyle="round"
-        borderColor="#D4A017"
-        paddingX={2}
-        marginBottom={1}
-      >
-        <Text bold color="#D4A017">
-          {" "}{current.icon} {current.label}{" "}
-        </Text>
-        {current.render(report)}
-      </Box>
-      <Box justifyContent="space-between" width="100%">
-        <Text color="#6C757D">
-          ◈ {report.projectName ?? report.projectPath}
-        </Text>
-        <Text color="#8D99AE">
-          {current.label} ({section + 1}/{totalSections})
-        </Text>
-        <Text color="#6C757D">
-          ←→ Navigate · Q Back
-        </Text>
-      </Box>
-    </Box>
-  );
-}
-
 function ScoreColor({ score }: { score: number }) {
   const color = score >= 80 ? "#52B788" : score >= 60 ? "#F4A261" : "#E63946";
   return <Text color={color}>{score}/100</Text>;
+}
+
+function IssueLine({
+  label,
+  count,
+  color,
+}: {
+  label: string;
+  count: number;
+  color: string;
+}) {
+  const has = count > 0;
+  return (
+    <Text>
+      <Text color="#8D99AE">{label.padEnd(18)} </Text>
+      <Text color={has ? color : "#8D99AE"}>
+        {has ? "◐" : "◉"} {has ? count : "—"}
+      </Text>
+    </Text>
+  );
+}
+
+function ScoreBar({ label, score }: { label: string; score: number }) {
+  const barWidth = 20;
+  const ratio = Math.min(score / 100, 1);
+  const filled = Math.round(ratio * barWidth);
+  const empty = barWidth - filled;
+  const barColor = score >= 80 ? "#52B788" : score >= 60 ? "#F4A261" : "#E63946";
+
+  return (
+    <Text>
+      <Text color="#8D99AE">{label.padEnd(18)}</Text>
+      <Text color={barColor}>{"▓".repeat(filled)}</Text>
+      <Text color="#3D405B">{"░".repeat(empty)}</Text>
+      <Text color={barColor}> {score}%</Text>
+    </Text>
+  );
+}
+
+function LangBar({ lang, files, total }: { lang: string; files: number; total: number }) {
+  const width = 20;
+  const ratio = total > 0 ? Math.min(files / total, 1) : 0;
+  const filled = Math.round(ratio * width);
+  const empty = width - filled;
+  const pct = (ratio * 100).toFixed(0);
+
+  return (
+    <Text>
+      <Text color="#8D99AE">{lang.padEnd(18)}</Text>
+      <Text color="#D4A017">{"▓".repeat(filled)}</Text>
+      <Text color="#3D405B">{"░".repeat(empty)}</Text>
+      <Text color="#D4A017"> {pct}%</Text>
+      <Text color="#6C757D"> ({files} files)</Text>
+    </Text>
+  );
 }
 
 function SummarySection({ report }: { report: AnalysisReport }) {
@@ -191,33 +150,11 @@ function SummarySection({ report }: { report: AnalysisReport }) {
   );
 }
 
-function IssueLine({
-  label,
-  count,
-  color,
-}: {
-  label: string;
-  count: number;
-  color: string;
-}) {
-  const has = count > 0;
-  return (
-    <Text>
-      <Text color="#8D99AE">{label.padEnd(18)} </Text>
-      <Text color={has ? color : "#8D99AE"}>
-        {has ? "◐" : "◉"} {has ? count : "—"}
-      </Text>
-    </Text>
-  );
-}
-
 function ScoresSection({ report }: { report: AnalysisReport }) {
   return (
     <Box flexDirection="column">
       {report.categoryScores.map((cat) => (
-        <Text key={cat.name}>
-          {createProgressBar(cat.score, 100, cat.name, { width: 25 })}
-        </Text>
+        <ScoreBar key={cat.name} label={cat.name} score={cat.score} />
       ))}
       <Box marginTop={1}>
         <Text color="#8D99AE">Overall: </Text>
@@ -232,10 +169,12 @@ function LanguagesSection({ report }: { report: AnalysisReport }) {
   return (
     <Box flexDirection="column">
       {sorted.map((lang) => (
-        <Text key={lang.language}>
-          <Text>{createProgressBar(lang.files, report.fileCount, lang.language, { width: 20, showPercent: true })}</Text>
-          <Text color="#6C757D"> ({lang.files} files, {lang.lines} lines)</Text>
-        </Text>
+        <LangBar
+          key={lang.language}
+          lang={lang.language}
+          files={lang.files}
+          total={report.fileCount}
+        />
       ))}
     </Box>
   );
@@ -274,7 +213,7 @@ function FilesSection({ report }: { report: AnalysisReport }) {
   return (
     <Box flexDirection="column">
       {report.biggestFolders.length > 0 && (
-        <>
+        <Box flexDirection="column">
           <Text color="#2A9D8F" bold>
             ▣ Largest Folders
           </Text>
@@ -287,7 +226,7 @@ function FilesSection({ report }: { report: AnalysisReport }) {
               <Text color="#6C757D"> ({f.fileCount} files)</Text>
             </Text>
           ))}
-        </>
+        </Box>
       )}
       {report.biggestFiles.length > 0 && (
         <Box marginTop={1} flexDirection="column">
@@ -330,11 +269,7 @@ function FilesSection({ report }: { report: AnalysisReport }) {
 
 function RecsSection({ report }: { report: AnalysisReport }) {
   if (report.recommendations.length === 0) {
-    return (
-      <Text color="#6C757D">
-        No recommendations - repository looks great!
-      </Text>
-    );
+    return <Text color="#6C757D">No recommendations — repository looks great!</Text>;
   }
   return (
     <Box flexDirection="column">
@@ -352,4 +287,77 @@ function formatSize(bytes: number): string {
   if (bytes < 1024) {return `${bytes} B`;}
   if (bytes < 1_048_576) {return `${(bytes / 1024).toFixed(1)} KB`;}
   return `${(bytes / 1_048_576).toFixed(1)} MB`;
+}
+
+export function ResultsView({
+  report,
+  section,
+}: ResultsViewProps) {
+  const sections: SectionDef[] = [
+    { label: "Summary", icon: icons.diamond, render: (r) => <SummarySection report={r} /> },
+    { label: "Score Breakdown", icon: icons.chart, render: (r) => <ScoresSection report={r} /> },
+    { label: "Languages", icon: icons.file, render: (r) => <LanguagesSection report={r} /> },
+    { label: "Technologies", icon: icons.package, render: (r) => <TechSection report={r} /> },
+    { label: "Files & Folders", icon: icons.folder, render: (r) => <FilesSection report={r} /> },
+    { label: "Recommendations", icon: icons.flag, render: (r) => <RecsSection report={r} /> },
+  ];
+
+  const current = sections[section];
+  if (!current) {return null;}
+
+  const totalSections = sections.length;
+
+  return (
+    <Box flexDirection="column" paddingX={2}>
+      <Header tagline="Analysis Complete" compact />
+      <Box
+        flexDirection="row"
+        borderStyle="round"
+        borderColor="#2A9D8F"
+        paddingX={2}
+        paddingY={1}
+        marginBottom={1}
+      >
+        <Text bold color="#2A9D8F">
+          {" "}Sections{" "}
+        </Text>
+        <Box gap={1} flexWrap="wrap">
+          {sections.map((s, i) => (
+            <Text
+              key={s.label}
+              color={i === section ? "#D4A017" : "#8D99AE"}
+              bold={i === section}
+            >
+              {i === section ? `${icons.arrow} ` : "  "}
+              {s.label}
+            </Text>
+          ))}
+        </Box>
+      </Box>
+      <Box
+        flexDirection="column"
+        borderStyle="round"
+        borderColor="#D4A017"
+        paddingX={2}
+        paddingY={1}
+        marginBottom={1}
+      >
+        <Text bold color="#D4A017">
+          {" "}{current.icon} {current.label}{" "}
+        </Text>
+        {current.render(report)}
+      </Box>
+      <Box justifyContent="space-between" width="100%">
+        <Text color="#6C757D">
+          ◈ {report.projectName ?? report.projectPath}
+        </Text>
+        <Text color="#8D99AE">
+          {current.label} ({section + 1}/{totalSections})
+        </Text>
+        <Text color="#6C757D">
+          ←→ Navigate · Q Back
+        </Text>
+      </Box>
+    </Box>
+  );
 }

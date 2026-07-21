@@ -70,58 +70,34 @@ export default function App() {
     setResultsSection(0);
   }, []);
 
-  const handleAnalyzeOrReport = useCallback(async () => {
+  const runAnalysis = useCallback(async (targetView: View, statusMsg: string) => {
     setView("progress");
     setIsRunning(true);
-    setStatusMessage("Analyzing...");
+    setStatusMessage(statusMsg);
     try {
       const mod = await import("../core/analyzer.js");
       const result = await mod.runAnalysis(directory, { useCache: false });
       setReport(result);
-      setView("results");
+      setView(targetView);
       setResultsSection(0);
-      setStatusMessage("Analysis complete");
+      setStatusMessage("Complete");
     } catch {
       setView("dashboard");
-      setStatusMessage("Analysis failed");
+      setStatusMessage(`${statusMsg} failed`);
     } finally {
       setIsRunning(false);
     }
   }, [directory]);
 
-  const handleQuickStats = useCallback(async () => {
-    setView("progress");
-    setIsRunning(true);
-    try {
-      const mod = await import("../core/analyzer.js");
-      const result = await mod.runAnalysis(directory, { useCache: false });
-      setReport(result);
-      setView("stats");
-    } catch {
-      setView("dashboard");
-      setStatusMessage("Stats failed");
-    } finally {
-      setIsRunning(false);
+  const executeCommand = useCallback(async (id: string) => {
+    if (id === "analyze" || id === "inspect" || id === "report") {
+      await runAnalysis("results", "Analyzing...");
+    } else if (id === "stats") {
+      await runAnalysis("stats", "Gathering stats...");
+    } else if (id === "doctor" || id === "checkup") {
+      await runAnalysis("results", "Running diagnostics...");
     }
-  }, [directory]);
-
-  const handleDoctor = useCallback(async () => {
-    setView("progress");
-    setIsRunning(true);
-    try {
-      const mod = await import("../core/analyzer.js");
-      const result = await mod.runAnalysis(directory, { useCache: false });
-      setReport(result);
-      setView("results");
-      setResultsSection(0);
-      setStatusMessage("Doctor complete");
-    } catch {
-      setView("dashboard");
-      setStatusMessage("Doctor failed");
-    } finally {
-      setIsRunning(false);
-    }
-  }, [directory]);
+  }, [runAnalysis]);
 
   const openPalette = useCallback(() => {
     setPaletteVisible(true);
@@ -133,21 +109,6 @@ export default function App() {
     setPaletteVisible(false);
     setPaletteQuery("");
   }, []);
-
-  const executeCommand = useCallback(
-    async (id: string) => {
-      if (id === "analyze" || id === "inspect") {
-        await handleAnalyzeOrReport();
-      } else if (id === "report") {
-        await handleAnalyzeOrReport();
-      } else if (id === "stats") {
-        await handleQuickStats();
-      } else if (id === "doctor" || id === "checkup") {
-        await handleDoctor();
-      }
-    },
-    [handleAnalyzeOrReport, handleQuickStats, handleDoctor],
-  );
 
   const getFilteredPalette = useCallback(() => {
     if (!paletteQuery) {return menuItems;}
