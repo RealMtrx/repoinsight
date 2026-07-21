@@ -216,23 +216,36 @@ for just that file; a directory analysis covers only that subtree.
 
 ### Keyboard Shortcuts
 
-| Key               | Action                    |
-| ----------------- | ------------------------- |
-| `↑`/`↓`           | Navigate menu             |
-| `Enter`           | Select / launch command   |
-| `Ctrl+K`          | Open command palette      |
-| `Ctrl+C`          | Quit (safety prompt)      |
-| `Esc`             | Back / close palette      |
-| `Tab`             | Cycle through menu items  |
-| `PageUp`/`PageDn` | Jump to first / last item |
-| `Q`               | Quit / back to dashboard  |
-| `R`               | Re-scan repository        |
-| `←`/`→`           | Navigate results sections |
+| Key               | Action                       |
+| ----------------- | ---------------------------- |
+| `↑`/`↓`           | Navigate menu / items        |
+| `Enter`           | Select / launch              |
+| `Ctrl+K`          | Open command palette         |
+| `Ctrl+C`          | Quit                         |
+| `Esc`             | Back / close                 |
+| `Tab`             | Cycle through menu items     |
+| `PageUp`/`PageDn` | Jump to first / last item    |
+| `Q`               | Quit / back to dashboard     |
+| `R`               | Re-scan repository           |
+| `←`/`→`           | Navigate results sections    |
+| `A`               | Add path (path manager)      |
+| `D`               | Remove path (path manager)   |
+| `Space`           | Toggle path enabled/disabled |
+
+### Views
 
 ### Views
 
 - **Dashboard** — repository metadata, detected technologies, and action menu
-- **Progress** — animated scan indicator while analysis runs
+- **Analyze Scope** — choose between "Entire Computer" (scan all drives) or "Custom Paths" (select
+  specific folders and repositories)
+- **Path Manager** — add, remove, toggle unlimited analysis targets with automatic type detection
+  (📦 Repository / 📁 Directory / 📄 File)
+- **Multi-Progress** — sequential analysis progress with completion count, elapsed time, and ETA
+  estimates
+- **Multi-Results** — aggregate summary showing total targets, files, average score, best project,
+  and worst project; per-project detail view available
+- **Progress** — animated scan indicator while single analysis runs
 - **Results** — six-section detailed report (Summary, Scores, Languages, Technologies, Files &
   Folders, Recommendations)
 - **Stats** — repository statistics with Git data

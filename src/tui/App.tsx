@@ -1,22 +1,42 @@
 import { useState, useEffect, useCallback } from "react";
 import { useInput, useApp } from "ink";
 import { Dashboard } from "./Dashboard.js";
+import { AnalyzeScopeScreen } from "./AnalyzeScopeScreen.js";
+import { PathManagerScreen } from "./PathManagerScreen.js";
 import { ProgressView } from "./ProgressView.js";
+import { MultiProgressView } from "./MultiProgressView.js";
 import { ResultsView } from "./ResultsView.js";
+import { MultiResultsView } from "./MultiResultsView.js";
 import { StatsView } from "./StatsView.js";
 import { TUIErrorBoundary } from "./ErrorBoundary.js";
 import { Detector } from "../detection/index.js";
 import { detectTarget } from "../utils/detectTarget.js";
-import type { AnalysisReport, DetectedTechnologies, AnalysisScope } from "../types/index.js";
+import { getSystemTargets } from "../utils/getSystemDrives.js";
+import type {
+  AnalysisReport,
+  DetectedTechnologies,
+  AnalysisScope,
+  AnalyzeTarget,
+  MultiAnalysisResult,
+  MultiAnalysisSummary,
+} from "../types/index.js";
 import type { MenuItem } from "./actions.js";
 
-type View = "dashboard" | "progress" | "results" | "stats";
+type View =
+  | "dashboard"
+  | "analyze-scope"
+  | "path-manager"
+  | "progress"
+  | "multi-progress"
+  | "results"
+  | "multi-results"
+  | "stats";
 
 const menuItems: MenuItem[] = [
   {
     id: "analyze",
     label: "analyze",
-    description: "Run full repository analysis",
+    description: "Analyze scope — file, directory, or full system",
     category: "Commands",
   },
   {
@@ -57,6 +77,9 @@ export default function App() {
 
   const [isRunning, setIsRunning] = useState(false);
 
+  const [targets, setTargets] = useState<AnalyzeTarget[]>([]);
+  const [multiResults, setMultiResults] = useState<MultiAnalysisSummary | null>(null);
+
   useEffect(() => {
     try {
       const detector = new Detector(directory);
@@ -69,9 +92,51 @@ export default function App() {
   const goToDashboard = useCallback(() => {
     setView("dashboard");
     setReport(null);
+    setMultiResults(null);
+    setTargets([]);
     setStatusMessage("Ready");
     setResultsSection(0);
   }, []);
+
+  const buildMultiSummary = useCallback(
+    (results: MultiAnalysisResult[]): MultiAnalysisSummary => {
+      const finished = results.filter((r) => r.report && !r.error);
+      const totalFiles = finished.reduce((s, r) => s + (r.report?.fileCount ?? 0), 0);
+      const repos = results.filter((r) => r.type === "repository").length;
+      const dirs = results.filter((r) => r.type === "directory").length;
+      const files = results.filter((r) => r.type === "file").length;
+      const scores = finished.map((r) => r.report?.score ?? 0).filter((s) => s > 0);
+      const avg = scores.length > 0
+        ? scores.reduce((a, b) => a + b, 0) / scores.length
+        : 0;
+
+      let best: MultiAnalysisSummary["bestProject"] = null;
+      let worst: MultiAnalysisSummary["worstProject"] = null;
+      for (const r of finished) {
+        if (!r.report) { continue; }
+        const name = r.name ?? r.path.split(/[\\/]/).pop() ?? r.path;
+        if (!best || (r.report.score ?? 0) > best.score) {
+          best = { name, score: r.report.score ?? 0 };
+        }
+        if (!worst || (r.report.score ?? 0) < worst.score) {
+          worst = { name, score: r.report.score ?? 0 };
+        }
+      }
+
+      return {
+        results,
+        totalTargets: results.length,
+        totalFiles,
+        repositories: repos,
+        directories: dirs,
+        files,
+        averageScore: Math.round(avg),
+        bestProject: best,
+        worstProject: worst && worst.name !== best?.name ? worst : null,
+      };
+    },
+    [],
+  );
 
   const runAnalysis = useCallback(async (targetView: View, statusMsg: string) => {
     setView("progress");
@@ -99,14 +164,53 @@ export default function App() {
   }, [directory]);
 
   const executeCommand = useCallback(async (id: string) => {
-    if (id === "analyze" || id === "inspect" || id === "report") {
+    if (id === "report") {
       await runAnalysis("results", "Analyzing...");
     } else if (id === "stats") {
       await runAnalysis("stats", "Gathering stats...");
     } else if (id === "doctor" || id === "checkup") {
       await runAnalysis("results", "Running diagnostics...");
+    } else if (id === "analyze" || id === "inspect") {
+      setView("analyze-scope");
     }
   }, [runAnalysis]);
+
+  const handleMultiComplete = useCallback((results: MultiAnalysisResult[]) => {
+    const summary = buildMultiSummary(results);
+    setMultiResults(summary);
+    setView("multi-results");
+    setStatusMessage("Complete");
+    setIsRunning(false);
+  }, [buildMultiSummary]);
+
+  const handleMultiError = useCallback((error: string) => {
+    setStatusMessage(`Analysis failed: ${error}`);
+    setView("dashboard");
+    setIsRunning(false);
+  }, []);
+
+  const startEntireComputer = useCallback(() => {
+    const drives = getSystemTargets();
+    setTargets(drives);
+    if (drives.length === 0) {
+      setStatusMessage("No drives detected");
+      setView("dashboard");
+      return;
+    }
+    setIsRunning(true);
+    setView("multi-progress");
+  }, []);
+
+  const startCustomPaths = useCallback(() => {
+    setView("path-manager");
+  }, []);
+
+  const startMultiAnalysis = useCallback(() => {
+    const enabled = targets.filter((t) => t.enabled);
+    if (enabled.length === 0) { return; }
+    setIsRunning(true);
+    setView("multi-progress");
+  }, [targets]);
 
   const openPalette = useCallback(() => {
     setPaletteVisible(true);
@@ -120,7 +224,7 @@ export default function App() {
   }, []);
 
   const getFilteredPalette = useCallback(() => {
-    if (!paletteQuery) {return menuItems;}
+    if (!paletteQuery) { return menuItems; }
     const q = paletteQuery.toLowerCase();
     return menuItems.filter(
       (item) =>
@@ -131,7 +235,7 @@ export default function App() {
 
   useInput(
     (input, key) => {
-      if (isRunning) {return;}
+      if (isRunning) { return; }
 
       if (paletteVisible) {
         if (key.escape) {
@@ -179,10 +283,19 @@ export default function App() {
         return;
       }
 
-      if (key.escape || input === "q" || input === "Q") {
-        if (view === "results" || view === "stats") {
+      if (input === "q" || input === "Q") {
+        if (view === "results" || view === "stats" || view === "multi-results") {
           goToDashboard();
         } else {
+          exit();
+        }
+        return;
+      }
+
+      if (key.escape) {
+        if (view === "results" || view === "stats" || view === "multi-results") {
+          goToDashboard();
+        } else if (view === "dashboard") {
           exit();
         }
         return;
@@ -198,7 +311,7 @@ export default function App() {
       if (view === "dashboard") {
         if (key.return) {
           const cmd = menuItems[menuIndex];
-          if (cmd) {void executeCommand(cmd.id);}
+          if (cmd) { void executeCommand(cmd.id); }
           return;
         }
         if (key.upArrow) {
@@ -210,8 +323,7 @@ export default function App() {
           return;
         }
         if (key.tab) {
-          const next = (menuIndex + 1) % menuItems.length;
-          setMenuIndex(next);
+          setMenuIndex((i) => (i + 1) % menuItems.length);
           return;
         }
         if (key.pageUp) {
@@ -257,32 +369,69 @@ export default function App() {
     { isActive: !isRunning },
   );
 
+  const renderView = () => {
+    switch (view) {
+      case "progress":
+        return <ProgressView scope={analysisScope} />;
+      case "multi-progress":
+        return (
+          <MultiProgressView
+            targets={targets.filter((t) => t.enabled)}
+            onComplete={handleMultiComplete}
+            onError={handleMultiError}
+          />
+        );
+      case "results":
+        return report ? <ResultsView report={report} section={resultsSection} /> : null;
+      case "multi-results":
+        return multiResults ? (
+          <MultiResultsView summary={multiResults} onBack={goToDashboard} />
+        ) : null;
+      case "stats":
+        return report ? <StatsView report={report} /> : null;
+      case "analyze-scope":
+        return (
+          <AnalyzeScopeScreen
+            onSelectEntireComputer={startEntireComputer}
+            onSelectCustomPaths={startCustomPaths}
+            onBack={goToDashboard}
+          />
+        );
+      case "path-manager":
+        return (
+          <PathManagerScreen
+            targets={targets}
+            onTargetsChange={setTargets}
+            onStart={startMultiAnalysis}
+            onBack={() => setView("analyze-scope")}
+          />
+        );
+      default:
+        return (
+          <Dashboard
+            directory={directory}
+            tech={tech}
+            scope={analysisScope}
+            menuItems={menuItems}
+            selectedIndex={menuIndex}
+            statusMessage={statusMessage}
+            paletteVisible={paletteVisible}
+            paletteQuery={paletteQuery}
+            paletteIndex={paletteIndex}
+            paletteItems={getFilteredPalette()}
+            onPaletteClose={closePalette}
+            onPaletteSelect={(id) => {
+              closePalette();
+              void executeCommand(id);
+            }}
+          />
+        );
+    }
+  };
+
   return (
     <TUIErrorBoundary>
-      {view === "progress" && <ProgressView scope={analysisScope} />}
-      {view === "results" && report && (
-        <ResultsView report={report} section={resultsSection} />
-      )}
-      {view === "stats" && report && <StatsView report={report} />}
-      {view === "dashboard" && (
-        <Dashboard
-          directory={directory}
-          tech={tech}
-          scope={analysisScope}
-          menuItems={menuItems}
-          selectedIndex={menuIndex}
-          statusMessage={statusMessage}
-          paletteVisible={paletteVisible}
-          paletteQuery={paletteQuery}
-          paletteIndex={paletteIndex}
-          paletteItems={getFilteredPalette()}
-          onPaletteClose={closePalette}
-          onPaletteSelect={(id) => {
-            closePalette();
-            void executeCommand(id);
-          }}
-        />
-      )}
+      {renderView()}
     </TUIErrorBoundary>
   );
 }

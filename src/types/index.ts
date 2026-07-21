@@ -187,6 +187,32 @@ export interface DetectedTechnologies {
 
 export type ScopeType = "file" | "directory" | "repository";
 
+export interface AnalyzeTarget {
+  path: string;
+  type: ScopeType;
+  enabled: boolean;
+}
+
+export interface MultiAnalysisResult {
+  path: string;
+  type: ScopeType;
+  name: string;
+  report: AnalysisReport;
+  error?: string;
+}
+
+export interface MultiAnalysisSummary {
+  results: MultiAnalysisResult[];
+  totalTargets: number;
+  totalFiles: number;
+  repositories: number;
+  directories: number;
+  files: number;
+  averageScore: number;
+  bestProject: { name: string; score: number } | null;
+  worstProject: { name: string; score: number } | null;
+}
+
 export interface AnalysisScope {
   type: ScopeType;
   targetPath: string;
