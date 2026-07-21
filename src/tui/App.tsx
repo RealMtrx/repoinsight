@@ -4,6 +4,7 @@ import { Dashboard } from "./Dashboard.js";
 import { ProgressView } from "./ProgressView.js";
 import { ResultsView } from "./ResultsView.js";
 import { StatsView } from "./StatsView.js";
+import { TUIErrorBoundary } from "./ErrorBoundary.js";
 import { Detector } from "../detection/index.js";
 import type { AnalysisReport, DetectedTechnologies } from "../types/index.js";
 import type { MenuItem } from "./actions.js";
@@ -200,6 +201,19 @@ export default function App() {
           setMenuIndex((i) => Math.min(menuItems.length - 1, i + 1));
           return;
         }
+        if (key.tab) {
+          const next = (menuIndex + 1) % menuItems.length;
+          setMenuIndex(next);
+          return;
+        }
+        if (key.pageUp) {
+          setMenuIndex(0);
+          return;
+        }
+        if (key.pageDown) {
+          setMenuIndex(menuItems.length - 1);
+          return;
+        }
         if (input === "r" || input === "R") {
           try {
             const detector = new Detector(directory);
@@ -221,44 +235,44 @@ export default function App() {
           setResultsSection((i) => Math.max(0, i - 1));
           return;
         }
+        if (key.pageUp) {
+          setResultsSection(0);
+          return;
+        }
+        if (key.pageDown) {
+          setResultsSection(5);
+          return;
+        }
       }
     },
     { isActive: !isRunning },
   );
 
-  if (view === "progress") {
-    return <ProgressView />;
-  }
-
-  if (view === "results" && report) {
-    return (
-      <ResultsView
-        report={report}
-        section={resultsSection}
-      />
-    );
-  }
-
-  if (view === "stats" && report) {
-    return <StatsView report={report} />;
-  }
-
   return (
-    <Dashboard
-      directory={directory}
-      tech={tech}
-      menuItems={menuItems}
-      selectedIndex={menuIndex}
-      statusMessage={statusMessage}
-      paletteVisible={paletteVisible}
-      paletteQuery={paletteQuery}
-      paletteIndex={paletteIndex}
-      paletteItems={getFilteredPalette()}
-      onPaletteClose={closePalette}
-      onPaletteSelect={(id) => {
-        closePalette();
-        void executeCommand(id);
-      }}
-    />
+    <TUIErrorBoundary>
+      {view === "progress" && <ProgressView />}
+      {view === "results" && report && (
+        <ResultsView report={report} section={resultsSection} />
+      )}
+      {view === "stats" && report && <StatsView report={report} />}
+      {view === "dashboard" && (
+        <Dashboard
+          directory={directory}
+          tech={tech}
+          menuItems={menuItems}
+          selectedIndex={menuIndex}
+          statusMessage={statusMessage}
+          paletteVisible={paletteVisible}
+          paletteQuery={paletteQuery}
+          paletteIndex={paletteIndex}
+          paletteItems={getFilteredPalette()}
+          onPaletteClose={closePalette}
+          onPaletteSelect={(id) => {
+            closePalette();
+            void executeCommand(id);
+          }}
+        />
+      )}
+    </TUIErrorBoundary>
   );
 }

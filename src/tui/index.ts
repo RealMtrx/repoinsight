@@ -24,6 +24,7 @@ export { confirm, prompt } from "./Prompt.js";
 export { startInteractiveTUI } from "./InteractiveTUI.js";
 export type { PaletteItem, MenuItem } from "./actions.js";
 
+export { TUIErrorBoundary } from "./ErrorBoundary.js";
 export { Header } from "./Header.js";
 export { Dashboard } from "./Dashboard.js";
 export { ProgressView } from "./ProgressView.js";
