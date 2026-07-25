@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
 import { Box, Text, useInput } from "ink";
 import { Header } from "./Header.js";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { detectTarget, scopeIcon } from "../utils/detectTarget.js";
 import type { AnalyzeTarget } from "../types/index.js";
 
@@ -30,6 +32,11 @@ export function PathManagerScreen({
       setInputError("Please enter a path");
       return;
     }
+    const resolved = path.resolve(trimmed);
+    if (!existsSync(resolved)) {
+      setInputError("Path does not exist");
+      return;
+    }
     try {
       const scope = detectTarget(trimmed);
       const exists = targets.some(
@@ -49,15 +56,8 @@ export function PathManagerScreen({
       setInputError(null);
       setMode("browse");
       setSelectedIndex(targets.length);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "";
-      if (message.includes("ENOENT") || message.includes("does not exist")) {
-        setInputError("Path does not exist");
-      } else if (message.includes("EACCES") || message.includes("permission")) {
-        setInputError("Permission denied — cannot access this path");
-      } else {
-        setInputError(`Invalid path — ${message || "does not exist"}`);
-      }
+    } catch {
+      setInputError("Cannot access this path");
     }
   }, [targets, onTargetsChange]);
 
