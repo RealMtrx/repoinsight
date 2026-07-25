@@ -1,7 +1,6 @@
 import { Command } from "commander";
 import { register } from "./registry.js";
 import type { CommandDefinition } from "./types.js";
-import { theme } from "../tui/index.js";
 
 const def: CommandDefinition = {
   name: "report",
@@ -32,46 +31,11 @@ const def: CommandDefinition = {
         const report = await runAnalysis(directory);
         spinner.succeed(" Report generated");
 
-        if (options.json) {
-          const { JsonReporter } = await import("../reporters/JsonReporter.js");
-          const output = new JsonReporter().render(report);
-          if (typeof options.output === "string") {
-            await import("fs").then((fs) =>
-              fs.promises.writeFile(options.output as string, output, "utf-8"),
-            );
-            console.log(theme.success(`Report saved to ${options.output}`));
-          } else {
-            console.log(output);
-          }
-          return;
-        }
-
-        if (options.html) {
-          const { HtmlReporter } = await import("../reporters/HtmlReporter.js");
-          const output = new HtmlReporter().render(report);
-          const path =
-            typeof options.output === "string" ? options.output : "repoinsight-report.html";
-          await import("fs").then((fs) => fs.promises.writeFile(path, output, "utf-8"));
-          console.log(theme.success(`HTML report saved to ${path}`));
-          return;
-        }
-
-        if (options.md) {
-          const { MarkdownReporter } = await import("../reporters/MarkdownReporter.js");
-          const output = new MarkdownReporter().render(report);
-          if (typeof options.output === "string") {
-            await import("fs").then((fs) =>
-              fs.promises.writeFile(options.output as string, output, "utf-8"),
-            );
-            console.log(theme.success(`Markdown report saved to ${options.output}`));
-          } else {
-            console.log(output);
-          }
-          return;
-        }
-
-        const { TerminalReporter } = await import("../reporters/TerminalReporter.js");
-        new TerminalReporter().render(report);
+        const { renderOutput, detectFormat } = await import("./output.js");
+        await renderOutput(report, {
+          format: detectFormat(options),
+          output: typeof options.output === "string" ? options.output : undefined,
+        });
       });
   },
 };
