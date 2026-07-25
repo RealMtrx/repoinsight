@@ -1,8 +1,7 @@
 import { useState, useCallback } from "react";
 import { Box, Text, useInput } from "ink";
 import { Header } from "./Header.js";
-import { detectTarget } from "../utils/detectTarget.js";
-import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
+import { detectTarget, scopeIcon } from "../utils/detectTarget.js";
 import type { AnalyzeTarget } from "../types/index.js";
 
 interface PathManagerScreenProps {
@@ -12,7 +11,7 @@ interface PathManagerScreenProps {
   onBack: () => void;
 }
 
-type Mode = "browse" | "adding" | "confirm-clear" | "confirm-entire";
+type Mode = "browse" | "adding";
 
 export function PathManagerScreen({
   targets,
@@ -50,8 +49,15 @@ export function PathManagerScreen({
       setInputError(null);
       setMode("browse");
       setSelectedIndex(targets.length);
-    } catch {
-      setInputError("Invalid path — does not exist");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "";
+      if (message.includes("ENOENT") || message.includes("does not exist")) {
+        setInputError("Path does not exist");
+      } else if (message.includes("EACCES") || message.includes("permission")) {
+        setInputError("Permission denied — cannot access this path");
+      } else {
+        setInputError(`Invalid path — ${message || "does not exist"}`);
+      }
     }
   }, [targets, onTargetsChange]);
 
@@ -93,21 +99,6 @@ export function PathManagerScreen({
         if (input?.length === 1 && !key.ctrl && !key.meta) {
           setInputPath((p) => p + input);
           setInputError(null);
-          return;
-        }
-        return;
-      }
-
-      if (mode === "confirm-clear" || mode === "confirm-entire") {
-        if (input === "y" || input === "Y") {
-          if (mode === "confirm-clear") {
-            onTargetsChange([]);
-          }
-          setMode("browse");
-          return;
-        }
-        if (input === "n" || input === "N" || key.escape) {
-          setMode("browse");
           return;
         }
         return;
@@ -191,17 +182,6 @@ export function PathManagerScreen({
     );
   }
 
-  if (mode === "confirm-clear") {
-    return (
-      <Box flexDirection="column" paddingX={2} alignItems="center" paddingY={4}>
-        <Text color="#F4A261" bold>Clear all paths?</Text>
-        <Box marginTop={1}>
-          <Text color="#8D99AE">  Y Yes · N No</Text>
-        </Box>
-      </Box>
-    );
-  }
-
   return (
     <Box flexDirection="column" paddingX={2}>
       <Header tagline="Add folders and repositories to analyze" />
@@ -233,11 +213,8 @@ export function PathManagerScreen({
                   <Text color={t.enabled ? "#52B788" : "#6C757D"}>
                     {t.enabled ? "✓" : "○"}
                   </Text>
-                  <Text color={isSelected ? "#E2DCC8" : "#8D99AE"} bold={isSelected}>
-                    {" "}{scopeIcon(t.type)} {scopeLabel(t.type)}{" "}
-                  </Text>
-                  <Text color={isSelected ? "#E2DCC8" : t.enabled ? "#8D99AE" : "#6C757D"}>
-                    {displayPath}
+                  <Text color={isSelected ? "#E2DCC8" : t.enabled ? "#8D99AE" : "#6C757D"} bold={isSelected}>
+                    {" "}{scopeIcon(t.type)}{" "}{displayPath}
                   </Text>
                 </Text>
               );

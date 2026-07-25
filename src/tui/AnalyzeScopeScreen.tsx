@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Box, Text, useInput } from "ink";
 import { Header } from "./Header.js";
+import { getSystemTargets } from "../utils/getSystemDrives.js";
 
 interface AnalyzeScopeScreenProps {
   onSelectEntireComputer: () => void;
@@ -22,6 +23,9 @@ export function AnalyzeScopeScreen({
 }: AnalyzeScopeScreenProps) {
   const [mode, setMode] = useState<Mode>("menu");
   const [selected, setSelected] = useState(0);
+
+  const drives = getSystemTargets();
+  const driveList = drives.map((d) => d.path).join(", ");
 
   useInput((_input, key) => {
     if (mode === "confirm-entire") {
@@ -70,6 +74,13 @@ export function AnalyzeScopeScreen({
             significant system resources.
           </Text>
         </Box>
+        {drives.length > 0 && (
+          <Box marginTop={1} width={56}>
+            <Text color="#6C757D">
+              Detected drives ({drives.length}): {driveList}
+            </Text>
+          </Box>
+        )}
         <Box marginTop={2}>
           <Text color="#E2DCC8">Are you sure you want to continue?</Text>
         </Box>

@@ -98,7 +98,9 @@ export function MultiProgressView({
   }, []);
 
   const completedCount = results.length;
-  const remaining = totalTargets - completedCount;
+  const scanning = completedCount < totalTargets;
+  const headerNum = scanning ? completedCount + 1 : totalTargets;
+  const remaining = scanning ? totalTargets - headerNum : 0;
   const currentTarget = targets[currentIndex];
 
   const avgTimePerItem = completedCount > 0 ? elapsed / completedCount : 0;
@@ -107,10 +109,10 @@ export function MultiProgressView({
   return (
     <Box flexDirection="column" alignItems="center" paddingY={3}>
       <Text color="#D4A017" bold>
-        ◈ Scanning ({completedCount + (remaining > 0 ? 1 : 0)} / {totalTargets})
+        Scanning ({headerNum} / {totalTargets})
       </Text>
 
-      {currentTarget && remaining > 0 && (
+      {scanning && currentTarget && (
         <Box flexDirection="column" alignItems="center" marginTop={1}>
           <Text color="#8D99AE">Current</Text>
           <Text>
@@ -124,20 +126,16 @@ export function MultiProgressView({
 
       <Box marginTop={1} flexDirection="column" alignItems="center">
         <Text>
-          <Text color="#8D99AE">Completed: </Text>
-          <Text color="#52B788">{completedCount}</Text>
-        </Text>
-        <Text>
-          <Text color="#8D99AE">Remaining: </Text>
+          <Text color="#8D99AE">Remaining  </Text>
           <Text color={remaining > 0 ? "#F4A261" : "#52B788"}>{remaining}</Text>
         </Text>
         <Text>
-          <Text color="#8D99AE">Elapsed:   </Text>
+          <Text color="#8D99AE">Elapsed    </Text>
           <Text color="#64B5F6">{formatTime(elapsed)}</Text>
         </Text>
-        {remaining > 0 && eta > 0 && (
+        {scanning && eta > 0 && (
           <Text>
-            <Text color="#8D99AE">ETA:       </Text>
+            <Text color="#8D99AE">ETA        </Text>
             <Text color="#64B5F6">{formatTime(eta)}</Text>
           </Text>
         )}

@@ -24,6 +24,10 @@ function gradeLabel(score: number): string {
   return "F";
 }
 
+function formatNumber(n: number): string {
+  return n.toLocaleString();
+}
+
 export function MultiResultsView({
   summary,
   onBack,
@@ -77,7 +81,7 @@ export function MultiResultsView({
                   </Text>
                   <Text>
                     <Text color="#8D99AE">  Files: </Text>
-                    <Text color="#E76F51">{r.report.fileCount}</Text>
+                    <Text color="#E76F51">{formatNumber(r.report.fileCount)}</Text>
                   </Text>
                   <Text>
                     <Text color="#8D99AE">  Duration: </Text>
@@ -118,19 +122,18 @@ export function MultiResultsView({
         borderColor="#D4A017"
         paddingX={1}
         marginBottom={1}
-        width={52}
+        width={48}
       >
         <Text bold color="#D4A017">
           {" "}Analysis Complete{" "}
         </Text>
-        <DataRow label="Repositories" value={String(summary.repositories)} color="#2A9D8F" />
-        <DataRow label="Folders" value={String(summary.directories)} color="#4895EF" />
-        <DataRow label="Files" value={String(summary.files)} color="#E76F51" />
-        <DataRow label="Total Targets" value={String(summary.totalTargets)} color="#8D99AE" />
+        <DataRow label="Repositories" value={formatNumber(summary.repositories)} color="#2A9D8F" />
+        <DataRow label="Folders" value={formatNumber(summary.directories)} color="#4895EF" />
+        <DataRow label="Total Files" value={formatNumber(summary.totalFiles)} color="#E76F51" />
         <Text>
-          <Text color="#8D99AE">  Average Score </Text>
+          <Text color="#8D99AE">  Average Health Score </Text>
           <Text bold color={scoreColor(avg)}>
-            {gradeLabel(avg)} ({avg.toFixed(0)}/100)
+            {gradeLabel(avg)}
           </Text>
         </Text>
       </Box>
@@ -142,18 +145,14 @@ export function MultiResultsView({
           borderColor="#52B788"
           paddingX={1}
           marginBottom={1}
-          width={52}
+          width={48}
         >
           <Text bold color="#52B788">
             {" "}Best Project{" "}
           </Text>
           <Text>
-            <Text color="#8D99AE">  Name  </Text>
+            <Text color="#8D99AE">  </Text>
             <Text color="#E2DCC8" bold>{best.name}</Text>
-          </Text>
-          <Text>
-            <Text color="#8D99AE">  Score </Text>
-            <Text color="#52B788">{best.score}/100</Text>
           </Text>
         </Box>
       )}
@@ -165,23 +164,19 @@ export function MultiResultsView({
           borderColor="#F4A261"
           paddingX={1}
           marginBottom={1}
-          width={52}
+          width={48}
         >
           <Text bold color="#F4A261">
             {" "}Needs Attention{" "}
           </Text>
           <Text>
-            <Text color="#8D99AE">  Name  </Text>
+            <Text color="#8D99AE">  </Text>
             <Text color="#E2DCC8" bold>{worst.name}</Text>
-          </Text>
-          <Text>
-            <Text color="#8D99AE">  Score </Text>
-            <Text color="#F4A261">{worst.score}/100</Text>
           </Text>
         </Box>
       )}
 
-      <Box justifyContent="space-between" width={52}>
+      <Box justifyContent="space-between" width={48}>
         <Text color="#6C757D">◈ repoinsight</Text>
         <Text color="#8D99AE">↓ Details · Esc Back</Text>
       </Box>
