@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { TerminalReporter } from "../../src/reporters/TerminalReporter.js";
 import { MarkdownReporter } from "../../src/reporters/MarkdownReporter.js";
-import type { AnalysisReport } from "../../src/types/index.js";
+import { JsonReporter } from "../../src/reporters/JsonReporter.js";
+import { HtmlReporter } from "../../src/reporters/HtmlReporter.js";
+import type { AnalysisReport, MultiAnalysisSummary } from "../../src/types/index.js";
 
 function createMockReport(overrides?: Partial<AnalysisReport>): AnalysisReport {
   const base: AnalysisReport = {
@@ -474,5 +476,248 @@ describe("MarkdownReporter", () => {
     expect(result).not.toContain("| Package");
     expect(result).toContain("Issues");
     expect(result).toContain("No issues detected");
+  });
+});
+
+function createMockMultiSummary(): MultiAnalysisSummary {
+  const baseReport: AnalysisReport = {
+    projectName: "test-project",
+    projectPath: "/test/path",
+    scope: { type: "repository", targetPath: "/test/path" },
+    analyzedAt: "2025-01-01T00:00:00.000Z",
+    duration: 100,
+    summary: {
+      totalFiles: 10, totalFolders: 3, totalSize: 10000, languages: 2,
+      contributors: 1, commits: 5, branches: 1, issues: 0, warnings: 0, errors: 0, score: 85,
+    },
+    folderStructure: "",
+    technologies: {
+      packageManager: "npm", packageManagerVersion: "9.x", monorepo: null, workspaces: false,
+      frameworks: ["react"], testFrameworks: ["vitest"], linters: ["eslint"], gitHooks: [],
+      changesets: false, ciProviders: ["github-actions"], docker: false, dockerCompose: false,
+      git: true, nodeVersion: null, typescript: true, javascript: true,
+      hasReadme: true, hasLicense: true, hasSecurity: false, hasContributing: false,
+      npmPackageType: "application", hasChangesetsConfig: false,
+    },
+    languages: [{ language: "TypeScript", files: 8, lines: 500, percentage: 80 }],
+    biggestFolders: [], biggestFiles: [], fileCount: 10, emptyFolders: [],
+    duplicateFileNames: [], circularImports: [], dependencyIssues: [], gitStats: null,
+    todoComments: [], hardcodedSecrets: [], largeAssets: [], binaryFiles: [], envFiles: [],
+    duplicateCode: [], complexity: [], missingReadme: false, missingLicense: false,
+    missingGitignore: false, missingTests: false, missingCi: false,
+    projectSize: 10000, documentationScore: 100, score: 85,
+    categoryScores: [
+      { name: "documentation", score: 50, maxScore: 50, percentage: 100, status: "excellent" },
+      { name: "testing", score: 40, maxScore: 50, percentage: 80, status: "good" },
+    ],
+    recommendations: [], warnings: [], errors: [],
+  };
+
+  const secondReport: AnalysisReport = {
+    ...baseReport,
+    projectName: "test-folder",
+    projectPath: "/test/folder",
+    scope: { type: "directory", targetPath: "/test/folder" },
+    score: 65,
+    summary: { ...baseReport.summary, score: 65, totalFiles: 5 },
+    fileCount: 5,
+  };
+
+  return {
+    results: [
+      { path: "/test/path", type: "repository", name: "test-project", report: baseReport },
+      { path: "/test/folder", type: "directory", name: "test-folder", report: secondReport },
+    ],
+    totalTargets: 2,
+    totalFiles: 15,
+    repositories: 1,
+    directories: 1,
+    files: 0,
+    averageScore: 75,
+    bestProject: { name: "test-project", score: 85 },
+    worstProject: { name: "test-folder", score: 65 },
+  };
+}
+
+describe("TerminalReporter.renderMulti", () => {
+  let reporter: TerminalReporter;
+  let consoleLogSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    reporter = new TerminalReporter();
+    consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleLogSpy.mockRestore();
+  });
+
+  it("renders without throwing", () => {
+    const summary = createMockMultiSummary();
+    expect(() => reporter.renderMulti(summary)).not.toThrow();
+  });
+
+  it("renders multi-path summary", () => {
+    const summary = createMockMultiSummary();
+    reporter.renderMulti(summary);
+    const calls = consoleLogSpy.mock.calls.map((c) => c[0]).join("");
+    expect(calls).toContain("Multi-Path");
+    expect(calls).toContain("test-project");
+    expect(calls).toContain("test-folder");
+  });
+
+  it("renders per-project results", () => {
+    const summary = createMockMultiSummary();
+    reporter.renderMulti(summary);
+    const calls = consoleLogSpy.mock.calls.map((c) => c[0]).join("");
+    expect(calls).toContain("Per-Project");
+  });
+});
+
+describe("MarkdownReporter.renderMulti", () => {
+  let reporter: MarkdownReporter;
+
+  beforeEach(() => {
+    reporter = new MarkdownReporter();
+  });
+
+  it("renders without throwing", () => {
+    const summary = createMockMultiSummary();
+    expect(() => reporter.renderMulti(summary)).not.toThrow();
+  });
+
+  it("returns a string", () => {
+    const result = reporter.renderMulti(createMockMultiSummary());
+    expect(typeof result).toBe("string");
+  });
+
+  it("contains multi-path report heading", () => {
+    const result = reporter.renderMulti(createMockMultiSummary());
+    expect(result).toContain("Multi-Path");
+    expect(result).toContain("target(s)");
+  });
+
+  it("contains per-project sections", () => {
+    const result = reporter.renderMulti(createMockMultiSummary());
+    expect(result).toContain("test-project");
+    expect(result).toContain("test-folder");
+  });
+
+  it("contains summary table", () => {
+    const result = reporter.renderMulti(createMockMultiSummary());
+    expect(result).toContain("| Targets");
+    expect(result).toContain("| Repositories");
+  });
+});
+
+describe("JsonReporter", () => {
+  let reporter: JsonReporter;
+
+  beforeEach(() => {
+    reporter = new JsonReporter();
+  });
+
+  it("renders without throwing", () => {
+    expect(() => reporter.render(createMockReport())).not.toThrow();
+  });
+
+  it("returns valid JSON", () => {
+    const result = reporter.render(createMockReport());
+    const parsed = JSON.parse(result);
+    expect(parsed.projectName).toBe("test-project");
+  });
+});
+
+describe("JsonReporter.renderMulti", () => {
+  let reporter: JsonReporter;
+
+  beforeEach(() => {
+    reporter = new JsonReporter();
+  });
+
+  it("renders without throwing", () => {
+    const summary = createMockMultiSummary();
+    expect(() => reporter.renderMulti(summary)).not.toThrow();
+  });
+
+  it("returns valid JSON with multi-analysis type", () => {
+    const result = reporter.renderMulti(createMockMultiSummary());
+    const parsed = JSON.parse(result);
+    expect(parsed.type).toBe("multi-analysis");
+    expect(parsed.totalTargets).toBe(2);
+    expect(parsed.results).toHaveLength(2);
+  });
+
+  it("includes per-project data", () => {
+    const result = reporter.renderMulti(createMockMultiSummary());
+    const parsed = JSON.parse(result);
+    expect(parsed.results[0].name).toBe("test-project");
+    expect(parsed.results[1].name).toBe("test-folder");
+  });
+
+  it("includes best and worst project", () => {
+    const result = reporter.renderMulti(createMockMultiSummary());
+    const parsed = JSON.parse(result);
+    expect(parsed.bestProject.name).toBe("test-project");
+    expect(parsed.worstProject.name).toBe("test-folder");
+  });
+});
+
+describe("HtmlReporter", () => {
+  let reporter: HtmlReporter;
+
+  beforeEach(() => {
+    reporter = new HtmlReporter();
+  });
+
+  it("renders without throwing", () => {
+    expect(() => reporter.render(createMockReport())).not.toThrow();
+  });
+
+  it("returns HTML string", () => {
+    const result = reporter.render(createMockReport());
+    expect(result).toContain("<!DOCTYPE html>");
+    expect(result).toContain("</html>");
+  });
+
+  it("contains project name", () => {
+    const result = reporter.render(createMockReport());
+    expect(result).toContain("test-project");
+  });
+});
+
+describe("HtmlReporter.renderMulti", () => {
+  let reporter: HtmlReporter;
+
+  beforeEach(() => {
+    reporter = new HtmlReporter();
+  });
+
+  it("renders without throwing", () => {
+    const summary = createMockMultiSummary();
+    expect(() => reporter.renderMulti(summary)).not.toThrow();
+  });
+
+  it("returns HTML string", () => {
+    const result = reporter.renderMulti(createMockMultiSummary());
+    expect(result).toContain("<!DOCTYPE html>");
+    expect(result).toContain("</html>");
+  });
+
+  it("contains multi-path heading", () => {
+    const result = reporter.renderMulti(createMockMultiSummary());
+    expect(result).toContain("Multi-Path");
+  });
+
+  it("contains per-project results", () => {
+    const result = reporter.renderMulti(createMockMultiSummary());
+    expect(result).toContain("test-project");
+    expect(result).toContain("test-folder");
+  });
+
+  it("contains summary stats", () => {
+    const result = reporter.renderMulti(createMockMultiSummary());
+    expect(result).toContain("Targets");
+    expect(result).toContain("Repositories");
   });
 });
