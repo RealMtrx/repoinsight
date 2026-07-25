@@ -1,5 +1,5 @@
 import Table from "cli-table3";
-import type { AnalysisReport, CategoryScore } from "../types/index.js";
+import type { AnalysisReport, CategoryScore, MultiAnalysisSummary } from "../types/index.js";
 import { APP_NAME } from "../constants/index.js";
 import { formatFileSize } from "../utils/file.js";
 import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
@@ -18,6 +18,92 @@ export class TerminalReporter {
     this.renderIssues(report);
     console.log(this.renderRecommendations(report.recommendations));
     console.log(this.renderFooter(report));
+  }
+
+  renderMulti(summary: MultiAnalysisSummary): void {
+    const w = Math.min(terminalWidth(), 72);
+    const border = theme.border;
+    const top = `${border(icons.topLeft)}${border(repeat(icons.horizontal, w))}${border(icons.topRight)}`;
+    const bottom = `${border(icons.bottomLeft)}${border(repeat(icons.horizontal, w))}${border(icons.bottomRight)}`;
+    const title = `${theme.primary(icons.diamond + " " + APP_NAME)} ${styles.subheading("Multi-Path Analysis")}`;
+
+    const grade = (s: number): string =>
+      s >= 90 ? "A" : s >= 80 ? "B" : s >= 65 ? "C" : s >= 50 ? "D" : "F";
+
+    const gradeColor = (s: number): ((t: string) => string) =>
+      s >= 80 ? severity.success : s >= 60 ? severity.medium : severity.high;
+
+    const totalTargets = summary.results.length;
+    const succeeded = summary.results.filter((r) => r.report && !r.error);
+    const failed = summary.results.filter((r) => r.error);
+
+    const lines: string[] = [
+      `${styles.label("Targets")}    ${styles.number}${String(totalTargets)}`,
+      `${styles.label("Succeeded")}  ${theme.success(String(succeeded.length))}`,
+      failed.length > 0
+        ? `${styles.label("Failed")}     ${severity.high(String(failed.length))}`
+        : "",
+      `${styles.label("Repos")}      ${styles.number}${String(summary.repositories)}`,
+      `${styles.label("Folders")}    ${styles.number}${String(summary.directories)}`,
+      `${styles.label("Total Files")} ${styles.number}${String(summary.totalFiles)}`,
+    ].filter(Boolean);
+
+    if (summary.averageScore > 0) {
+      const avg = summary.averageScore;
+      lines.push(
+        `${styles.label("Avg Score")}  ${severity.success(grade(avg))} ${styles.dim(`(${avg}/100)`)}`,
+      );
+    }
+
+    console.log(
+      `\n${top}\n${styles.dim(repeat(" ", Math.floor((w - title.length) / 2))) + title}\n${top}`,
+    );
+    console.log(this.simpleBox(lines, " Multi-Path Summary "));
+
+    if (summary.bestProject) {
+      console.log(
+        this.simpleBox(
+          [
+            `  ${theme.primary(icons.star)} ${summary.bestProject.name}`,
+            `  ${styles.label("Score")} ${gradeColor(summary.bestProject.score)(`${summary.bestProject.score}/100`)}`,
+          ],
+          " Best Project ",
+        ),
+      );
+    }
+
+    if (summary.worstProject && summary.worstProject.name !== summary.bestProject?.name) {
+      console.log(
+        this.simpleBox(
+          [
+            `  ${severity.high(icons.alert)} ${summary.worstProject.name}`,
+            `  ${styles.label("Score")} ${gradeColor(summary.worstProject.score)(`${summary.worstProject.score}/100`)}`,
+          ],
+          " Needs Attention ",
+        ),
+      );
+    }
+
+    console.log(`\n${styles.subheading(" Per-Project Results")}\n`);
+
+    for (const r of summary.results) {
+      const icon = r.error ? severity.high(icons.cross) : theme.success(icons.check);
+      const name = r.name ?? r.path.split(/[\\/]/).pop() ?? r.path;
+      console.log(`  ${icon} ${scopeIcon(r.type)} ${styles.keyword(name)}`);
+      console.log(`     ${styles.dim(r.path)}`);
+      if (r.error) {
+        console.log(`     ${severity.high(r.error)}`);
+      } else if (r.report) {
+        console.log(
+          `  ${styles.label("Score")} ${gradeColor(r.report.score)(`${r.report.score}/100`)}` +
+            `  ${styles.label("Files")} ${styles.number}${String(r.report.fileCount)}` +
+            `  ${styles.label("Duration")} ${styles.dim(formatDuration(r.report.duration))}`,
+        );
+      }
+      console.log("");
+    }
+
+    console.log(bottom);
   }
 
   private renderHeader(report: AnalysisReport): string {

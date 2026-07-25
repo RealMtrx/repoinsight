@@ -234,22 +234,30 @@ for just that file; a directory analysis covers only that subtree.
 
 ### Views
 
-### Views
+The TUI guides you through a structured analysis workflow:
 
-- **Dashboard** — repository metadata, detected technologies, and action menu
-- **Analyze Scope** — choose between "Entire Computer" (scan all drives) or "Custom Paths" (select
-  specific folders and repositories)
-- **Path Manager** — add, remove, toggle unlimited analysis targets with automatic type detection
-  (📦 Repository / 📁 Directory / 📄 File)
-- **Multi-Progress** — sequential analysis progress with completion count, elapsed time, and ETA
-  estimates
-- **Multi-Results** — aggregate summary showing total targets, files, average score, best project,
-  and worst project; per-project detail view available
-- **Progress** — animated scan indicator while single analysis runs
-- **Results** — six-section detailed report (Summary, Scores, Languages, Technologies, Files &
-  Folders, Recommendations)
-- **Stats** — repository statistics with Git data
-- **Command Palette** — fuzzy-searchable quick commands (`Ctrl+K`)
+1. **Dashboard** — project metadata, detected technologies, and action menu
+2. **Analyze Scope** — choose scan target:
+   - **Entire Computer** — scans all connected drives (shows warning + drive list before starting)
+   - **Custom Paths** — open the Path Manager to select specific folders and repositories
+3. **Path Manager** — manage unlimited analysis targets:
+   - Add any number of paths; types auto-detected (📦 Repository / 📁 Folder)
+   - Toggle paths on/off, remove selected, preview detected types
+   - Paths validated on entry with friendly error messages
+4. **Multi-Progress** — sequential analysis with live status:
+   - Shows current target, remaining count, elapsed time, and ETA
+   - Results so far listed as each completes
+   - Parallel mode architecture ready for future use
+5. **Multi-Results** — aggregate summary of all analyzed targets:
+   - Total repositories, folders, and files scanned
+   - Average health score (letter grade)
+   - Best project and project needing attention
+   - Per-project detail view (scores, files, duration, languages)
+6. **Progress** — animated scan indicator for single-target analysis
+7. **Results** — six-section detailed report (Summary, Scores, Languages, Technologies, Files &
+   Folders, Recommendations)
+8. **Stats** — repository statistics with Git data
+9. **Command Palette** — fuzzy-searchable quick commands (`Ctrl+K`)
 
 > The TUI includes a React error boundary that catches render crashes gracefully and displays a
 > user-friendly error message without crashing the terminal.

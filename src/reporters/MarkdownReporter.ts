@@ -1,4 +1,4 @@
-import type { AnalysisReport } from "../types/index.js";
+import type { AnalysisReport, MultiAnalysisSummary } from "../types/index.js";
 import { formatFileSize } from "../utils/file.js";
 import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
 
@@ -31,6 +31,69 @@ export class MarkdownReporter {
     }
 
     return s.join("\n\n");
+  }
+
+  renderMulti(summary: MultiAnalysisSummary): string {
+    const s: string[] = [];
+
+    s.push("# ◆ repoinsight Multi-Path Analysis Report\n");
+    s.push(
+      `> Analyzed ${summary.totalTargets} target(s): ` +
+        `${summary.repositories} repositories, ${summary.directories} directories, ${summary.files} files\n`,
+    );
+    s.push(`> Total files scanned: ${summary.totalFiles}\n`);
+
+    const grade = (sc: number): string =>
+      sc >= 90 ? "A" : sc >= 80 ? "B" : sc >= 65 ? "C" : sc >= 50 ? "D" : "F";
+
+    s.push("## Summary\n");
+    s.push("| Metric | Value |");
+    s.push("|--------|-------|");
+    s.push(`| Targets | ${summary.totalTargets} |`);
+    s.push(`| Repositories | ${summary.repositories} |`);
+    s.push(`| Folders | ${summary.directories} |`);
+    s.push(`| Files | ${summary.files} |`);
+    s.push(`| Total Files Scanned | ${summary.totalFiles} |`);
+    s.push(
+      `| **Average Score** | **${grade(summary.averageScore)}** (${summary.averageScore}/100) |`,
+    );
+
+    if (summary.bestProject) {
+      s.push(
+        `\n## Best Project\n\n- **${summary.bestProject.name}** — ${summary.bestProject.score}/100\n`,
+      );
+    }
+
+    if (summary.worstProject && summary.worstProject.name !== summary.bestProject?.name) {
+      s.push(
+        `\n## Needs Attention\n\n- **${summary.worstProject.name}** — ${summary.worstProject.score}/100\n`,
+      );
+    }
+
+    s.push("\n## Per-Project Results\n");
+
+    for (const r of summary.results) {
+      const icon = r.error ? "✗" : "✓";
+      const name = r.name ?? r.path.split(/[\\/]/).pop() ?? r.path;
+      s.push(`### ${icon} ${scopeIcon(r.type)} ${name}\n`);
+      s.push(`- **Path:** \`${r.path}\``);
+      if (r.error) {
+        s.push(`- **Error:** ${r.error}`);
+      } else if (r.report) {
+        s.push(`- **Score:** ${r.report.score}/100`);
+        s.push(`- **Files:** ${r.report.fileCount}`);
+        s.push(`- **Duration:** ${r.report.duration}ms`);
+        s.push(
+          `- **Languages:** ${r.report.languages
+            .slice(0, 3)
+            .map((l) => l.language)
+            .join(", ")}`,
+        );
+      }
+      s.push("");
+    }
+
+    return s.join("\n");
   }
 
   private summary(r: AnalysisReport): string {

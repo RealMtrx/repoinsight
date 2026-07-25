@@ -1,4 +1,4 @@
-import type { AnalysisReport } from "../types/index.js";
+import type { AnalysisReport, MultiAnalysisSummary } from "../types/index.js";
 import { formatFileSize } from "../utils/file.js";
 import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
 
@@ -29,108 +29,7 @@ export class HtmlReporter {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>repoinsight Report — ${this.esc(report.projectName)}</title>
-<style>
-  :root { color-scheme: dark; }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
-    background: ${C.bg};
-    color: ${C.text};
-    line-height: 1.6;
-  }
-  .container { max-width: 1120px; margin: 0 auto; padding: 32px 24px; }
-
-  /* Header */
-  .brand {
-    display: flex; align-items: center; justify-content: center; gap: 12px;
-    padding: 48px 24px 32px;
-    border-bottom: 1px solid ${C.border};
-    margin-bottom: 32px;
-    text-align: center;
-  }
-  .brand-logo {
-    width: 48px; height: 48px;
-    background: linear-gradient(135deg, ${C.gradient1}, ${C.gradient2});
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; font-weight: 800; color: ${C.bg};
-  }
-  .brand h1 { font-size: 2.2rem; font-weight: 700; color: ${C.primary}; }
-  .brand .sub { color: ${C.textSecondary}; font-size: 0.95rem; margin-top: 4px; }
-
-  /* Score ring */
-  .score-wrap { text-align: center; margin-bottom: 32px; }
-  .score-ring {
-    width: 150px; height: 150px; border-radius: 50%;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 2.8rem; font-weight: 800;
-    border: 5px solid; margin-bottom: 8px;
-    transition: transform .2s;
-  }
-  .score-ring:hover { transform: scale(1.05); }
-  .sc-excellent { border-color: ${C.success}; color: ${C.success}; }
-  .sc-good { border-color: ${C.secondary}; color: ${C.secondary}; }
-  .sc-fair { border-color: ${C.warning}; color: ${C.warning}; }
-  .sc-poor { border-color: ${C.accent}; color: ${C.accent}; }
-  .sc-critical { border-color: ${C.error}; color: ${C.error}; }
-  .score-label { font-size: 0.9rem; color: ${C.textSecondary}; }
-
-  /* Summary */
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 32px; }
-  .card {
-    background: ${C.bgCard}; border: 1px solid ${C.border}; border-radius: 10px;
-    padding: 18px 12px; text-align: center; transition: border-color .2s;
-  }
-  .card:hover { border-color: ${C.primary}44; }
-  .card .val { font-size: 1.6rem; font-weight: 700; color: ${C.primary}; }
-  .card .lbl { font-size: 0.75rem; color: ${C.textSecondary}; text-transform: uppercase; letter-spacing: .6px; margin-top: 4px; }
-
-  /* Section */
-  .sec { margin-bottom: 32px; }
-  .sec h2 {
-    font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px;
-    border-bottom: 1px solid ${C.border}; color: ${C.secondary};
-    display: flex; align-items: center; gap: 8px;
-  }
-  .sec h2::before { content: "◆"; font-size: .7rem; color: ${C.primary}; }
-
-  /* Categories */
-  .cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
-  .cat-card { background: ${C.bgCard}; border: 1px solid ${C.border}; border-radius: 10px; padding: 16px; }
-  .cat-card h3 { font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; color: ${C.textSecondary}; margin-bottom: 6px; }
-  .cat-card .pct { font-size: 1.4rem; font-weight: 700; }
-  .bar { height: 6px; background: ${C.border}; border-radius: 3px; overflow: hidden; margin: 8px 0; }
-  .bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
-  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: .7rem; font-weight: 600; }
-
-  /* Tables */
-  table { width: 100%; border-collapse: collapse; background: ${C.bgCard}; border: 1px solid ${C.border}; border-radius: 8px; overflow: hidden; }
-  th, td { padding: 9px 14px; text-align: left; border-bottom: 1px solid ${C.border}; }
-  th { background: ${C.bgHover}; font-size: .75rem; text-transform: uppercase; letter-spacing: .4px; color: ${C.textSecondary}; font-weight: 600; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: ${C.bgHover}; }
-
-  /* Issues */
-  .issue { padding: 10px 14px; background: ${C.bgCard}; border: 1px solid ${C.border}; border-left: 3px solid; border-radius: 6px; margin-bottom: 6px; font-size: .9rem; }
-  .issue-crit { border-left-color: ${C.error}; }
-  .issue-warn { border-left-color: ${C.warning}; }
-  .issue code { color: ${C.primary}; font-size: .85rem; }
-
-  /* Recommendations */
-  .rec-list { list-style: none; }
-  .rec-list li { padding: 10px 14px; background: ${C.bgCard}; border: 1px solid ${C.border}; border-radius: 8px; margin-bottom: 6px; }
-  .rec-list li::before { content: "◆ "; color: ${C.primary}; }
-
-  /* Footer */
-  footer { text-align: center; padding: 24px; color: ${C.muted}; font-size: .8rem; border-top: 1px solid ${C.border}; margin-top: 32px; }
-
-  @media (max-width: 640px) {
-    .container { padding: 16px; }
-    .brand h1 { font-size: 1.5rem; }
-    .grid { grid-template-columns: repeat(2, 1fr); }
-    .cat-grid { grid-template-columns: 1fr; }
-  }
-</style>
+<style>${this.sharedStyles()}</style>
 </head>
 <body>
 <div class="container">
@@ -395,5 +294,227 @@ export class HtmlReporter {
 
   private cap(s: string): string {
     return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  renderMulti(summary: MultiAnalysisSummary): string {
+    const grade = (sc: number): string =>
+      sc >= 90 ? "A" : sc >= 80 ? "B" : sc >= 65 ? "C" : sc >= 50 ? "D" : "F";
+
+    const gradeColor = (sc: number): string =>
+      sc >= 80 ? C.success : sc >= 60 ? C.warning : C.error;
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>repoinsight Multi-Path Report</title>
+<style>${this.sharedStyles()}
+.multi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.result-card { background: ${C.bgCard}; border: 1px solid ${C.border}; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+.result-card:hover { border-color: ${C.primary}44; }
+.result-card .path { font-size: .8rem; color: ${C.textSecondary}; margin-top: 4px; }
+.result-card .error { color: ${C.error}; }
+.project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.project-card { background: ${C.bgCard}; border: 1px solid ${C.border}; border-radius: 10px; padding: 16px; }
+.project-card h3 { font-size: .9rem; color: ${C.primary}; margin-bottom: 8px; }
+.project-card .stat { font-size: .8rem; color: ${C.textSecondary}; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="brand">
+    <div class="brand-logo">R</div>
+    <div>
+      <h1>Multi-Path Analysis Report</h1>
+      <div class="sub">${summary.totalTargets} target(s) · ${summary.repositories} repositories · ${summary.directories} directories</div>
+      <div class="sub" style="margin-top:4px;font-size:.85rem">Total files scanned: ${summary.totalFiles}</div>
+    </div>
+  </div>
+
+  <div class="score-wrap">
+    <div class="score-ring sc-${this.scoreClass(summary.averageScore)}" style="font-size:2rem">
+      ${grade(summary.averageScore)}
+    </div>
+    <div class="score-label">average health score (${summary.averageScore}/100)</div>
+  </div>
+
+  <div class="multi-grid">
+    <div class="card"><div class="val">${summary.totalTargets}</div><div class="lbl">Targets</div></div>
+    <div class="card"><div class="val">${summary.repositories}</div><div class="lbl">Repositories</div></div>
+    <div class="card"><div class="val">${summary.directories}</div><div class="lbl">Folders</div></div>
+    <div class="card"><div class="val">${summary.files}</div><div class="lbl">Files</div></div>
+    <div class="card"><div class="val">${summary.totalFiles}</div><div class="lbl">Total Files Scanned</div></div>
+  </div>
+
+  ${
+    summary.bestProject
+      ? `
+  <div class="sec">
+    <h2>Best Project</h2>
+    <div style="background:${C.bgCard};border:1px solid ${C.success}44;border-radius:10px;padding:16px">
+      <div style="font-size:1.2rem;font-weight:700;color:${C.success}">${this.esc(summary.bestProject.name)}</div>
+      <div style="font-size:.85rem;color:${C.textSecondary};margin-top:4px">Score: ${summary.bestProject.score}/100</div>
+    </div>
+  </div>`
+      : ""
+  }
+
+  ${
+    summary.worstProject && summary.worstProject.name !== summary.bestProject?.name
+      ? `
+  <div class="sec">
+    <h2>Needs Attention</h2>
+    <div style="background:${C.bgCard};border:1px solid ${C.error}44;border-radius:10px;padding:16px">
+      <div style="font-size:1.2rem;font-weight:700;color:${C.error}">${this.esc(summary.worstProject.name)}</div>
+      <div style="font-size:.85rem;color:${C.textSecondary};margin-top:4px">Score: ${summary.worstProject.score}/100</div>
+    </div>
+  </div>`
+      : ""
+  }
+
+  <div class="sec">
+    <h2>Per-Project Results (${summary.results.length})</h2>
+    ${summary.results
+      .map((r) => {
+        const name = r.name ?? r.path.split(/[\\/]/).pop() ?? r.path;
+        const icon = r.error ? "✗" : "✓";
+        const borderCol = r.error
+          ? C.error
+          : r.report?.score >= 80
+            ? C.success
+            : r.report?.score >= 60
+              ? C.warning
+              : C.error;
+        return `<div class="result-card" style="border-left:3px solid ${borderCol}">
+        <div><strong>${icon} ${scopeIcon(r.type)} ${this.esc(name)}</strong></div>
+        <div class="path">${this.esc(r.path)}</div>
+        ${
+          r.error
+            ? `<div class="error">${this.esc(r.error)}</div>`
+            : r.report
+              ? `
+        <div style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap">
+          <span class="stat"><strong>Score:</strong> <span style="color:${gradeColor(r.report.score)}">${r.report.score}/100</span></span>
+          <span class="stat"><strong>Files:</strong> ${r.report.fileCount}</span>
+          <span class="stat"><strong>Duration:</strong> ${r.report.duration}ms</span>
+          ${
+            r.report.languages.length
+              ? `<span class="stat"><strong>Languages:</strong> ${r.report.languages
+                  .slice(0, 3)
+                  .map((l) => l.language)
+                  .join(", ")}</span>`
+              : ""
+          }
+        </div>`
+              : ""
+        }
+      </div>`;
+      })
+      .join("")}
+  </div>
+
+  <footer>Generated by <strong>repoinsight</strong> — Multi-path analysis · ${new Date().toISOString()}</footer>
+</div>
+</body>
+</html>`;
+
+    return html;
+  }
+
+  private sharedStyles(): string {
+    return `
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+    background: ${C.bg};
+    color: ${C.text};
+    line-height: 1.6;
+  }
+  .container { max-width: 1120px; margin: 0 auto; padding: 32px 24px; }
+
+  .brand {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    padding: 48px 24px 32px;
+    border-bottom: 1px solid ${C.border};
+    margin-bottom: 32px;
+    text-align: center;
+  }
+  .brand-logo {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, ${C.gradient1}, ${C.gradient2});
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 800; color: ${C.bg};
+  }
+  .brand h1 { font-size: 2.2rem; font-weight: 700; color: ${C.primary}; }
+  .brand .sub { color: ${C.textSecondary}; font-size: 0.95rem; margin-top: 4px; }
+
+  .score-wrap { text-align: center; margin-bottom: 32px; }
+  .score-ring {
+    width: 150px; height: 150px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 2.8rem; font-weight: 800;
+    border: 5px solid; margin-bottom: 8px;
+    transition: transform .2s;
+  }
+  .score-ring:hover { transform: scale(1.05); }
+  .sc-excellent { border-color: ${C.success}; color: ${C.success}; }
+  .sc-good { border-color: ${C.secondary}; color: ${C.secondary}; }
+  .sc-fair { border-color: ${C.warning}; color: ${C.warning}; }
+  .sc-poor { border-color: ${C.accent}; color: ${C.accent}; }
+  .sc-critical { border-color: ${C.error}; color: ${C.error}; }
+  .score-label { font-size: 0.9rem; color: ${C.textSecondary}; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 32px; }
+  .card {
+    background: ${C.bgCard}; border: 1px solid ${C.border}; border-radius: 10px;
+    padding: 18px 12px; text-align: center; transition: border-color .2s;
+  }
+  .card:hover { border-color: ${C.primary}44; }
+  .card .val { font-size: 1.6rem; font-weight: 700; color: ${C.primary}; }
+  .card .lbl { font-size: 0.75rem; color: ${C.textSecondary}; text-transform: uppercase; letter-spacing: .6px; margin-top: 4px; }
+
+  .sec { margin-bottom: 32px; }
+  .sec h2 {
+    font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 1px solid ${C.border}; color: ${C.secondary};
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sec h2::before { content: "◆"; font-size: .7rem; color: ${C.primary}; }
+
+  .cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .cat-card { background: ${C.bgCard}; border: 1px solid ${C.border}; border-radius: 10px; padding: 16px; }
+  .cat-card h3 { font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; color: ${C.textSecondary}; margin-bottom: 6px; }
+  .cat-card .pct { font-size: 1.4rem; font-weight: 700; }
+  .bar { height: 6px; background: ${C.border}; border-radius: 3px; overflow: hidden; margin: 8px 0; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width .6s ease; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: .7rem; font-weight: 600; }
+
+  table { width: 100%; border-collapse: collapse; background: ${C.bgCard}; border: 1px solid ${C.border}; border-radius: 8px; overflow: hidden; }
+  th, td { padding: 9px 14px; text-align: left; border-bottom: 1px solid ${C.border}; }
+  th { background: ${C.bgHover}; font-size: .75rem; text-transform: uppercase; letter-spacing: .4px; color: ${C.textSecondary}; font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: ${C.bgHover}; }
+
+  .issue { padding: 10px 14px; background: ${C.bgCard}; border: 1px solid ${C.border}; border-left: 3px solid; border-radius: 6px; margin-bottom: 6px; font-size: .9rem; }
+  .issue-crit { border-left-color: ${C.error}; }
+  .issue-warn { border-left-color: ${C.warning}; }
+  .issue code { color: ${C.primary}; font-size: .85rem; }
+
+  .rec-list { list-style: none; }
+  .rec-list li { padding: 10px 14px; background: ${C.bgCard}; border: 1px solid ${C.border}; border-radius: 8px; margin-bottom: 6px; }
+  .rec-list li::before { content: "◆ "; color: ${C.primary}; }
+
+  footer { text-align: center; padding: 24px; color: ${C.muted}; font-size: .8rem; border-top: 1px solid ${C.border}; margin-top: 32px; }
+
+  @media (max-width: 640px) {
+    .container { padding: 16px; }
+    .brand h1 { font-size: 1.5rem; }
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    .cat-grid { grid-template-columns: 1fr; }
+  }
+`;
   }
 }
