@@ -5,6 +5,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] — 2026-07-28
+
+### Added
+
+- **Multi-path analysis workflow** — Sequential analysis across multiple targets with aggregate
+  scoring and results
+- **Multi-progress display** — Shows `Scanning (N / M)`, `Current`, `Remaining`, `Elapsed`, `ETA`
+  during sequential analysis
+- **Multi-results view** — Summary of repositories, folders, total files, average health score, best
+  project, and needs-attention list
+- **Renderer support for multi-path output** — `renderMulti()` method on all 4 reporters (Terminal,
+  JSON, Markdown, HTML) with `renderMultiReport()` factory in `reporters/index.ts`
+- **Shared CLI output module** — `src/commands/output.ts` with `renderOutput()`,
+  `renderMultiOutput()`, and `detectFormat()`, removing 60 lines of duplicated if/else from
+  `analyze.ts` and `report.ts`
+- **22 new tests** for `renderMulti` on all 4 reporters (277 total)
+
+### Changed
+
+- **AnalyzeScopeScreen** — Shows detected‑drives list in Entire‑Computer warning; updated bottom
+  navigation text
+- **PathManagerScreen** — Simplified display (icon + path only, no type label); explicit
+  `existsSync()` validation before `detectTarget()` to reject non‑existent paths; clearer error
+  messages for permission/ENOENT
+- **MultiProgressView** — Redesigned header to `Scanning (N / M)` format with Current, Remaining,
+  Elapsed, ETA fields
+- **MultiResultsView** — Simplified summary to show only repositories, folders, total files, average
+  health score (letter grade), best project, and needs attention; per‑project detail via down arrow
+- **DetectTarget** no longer throws for non‑existent paths (returns default `repository` type)
+
+## [1.3.0] — 2026-07-21
+
+### Added
+
+- **Error boundary** — `ErrorBoundary` component wrapping the TUI to catch rendering errors
+  gracefully
+- **Keyboard shortcuts** — Comprehensive shortcut system with bottom‑bar hints
+- **Polished views** — Refined layout, spacing, and visual consistency across all TUI screens
+
+### Changed
+
+- **Ink migration** — Migrated custom raw‑mode TUI to Ink (React-based CLI framework) for better
+  rendering, component lifecycle, and hook support
+- **Progress views** — Replaced chalk progress bars with Ink-native `Static` + `Text` components
+- **Non‑TTY handling** — Graceful fallback when stdin is not a TTY instead of crashing with Ink raw
+  mode error
+- **Windows compatibility** — Fixed CRLF (\\r\\n) handling for Enter key in raw input decoding
+
+## [1.2.0] — 2026-07-21
+
+### Added
+
+- **Action dispatcher** — Centralized action handling with `actions.ts` for TUI event dispatch
+- **Results viewer** — `ResultsViewer` component for browsing analysis results interactively
+- **Dashboard rewrite** — Full analysis integration with ASCII logo and enhanced scan screen
+
+### Fixed
+
+- `doctor` command registered with CLI registry so it appears in command help
+
 ## [1.1.0] — 2026-07-21
 
 ### Added
