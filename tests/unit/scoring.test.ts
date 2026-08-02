@@ -27,6 +27,7 @@ function createMockReport(overrides?: Partial<AnalysisReport>): AnalysisReport {
     biggestFolders: [],
     biggestFiles: [],
     fileCount: 10,
+    testFileCount: 4,
     emptyFolders: [],
     duplicateFileNames: [],
     circularImports: [],
@@ -77,6 +78,18 @@ describe("calculateCategoryScores", () => {
       "performance",
       "codeQuality",
     ]);
+  });
+
+  it("calculates testing score using test file ratio", () => {
+    const noTests = createMockReport({ missingTests: true });
+    const someTests = createMockReport({ missingTests: false, testFileCount: 4 });
+    const manyTests = createMockReport({ missingTests: false, testFileCount: 10 });
+    const none = calculateCategoryScores(noTests).find((s) => s.name === "testing");
+    const partial = calculateCategoryScores(someTests).find((s) => s.name === "testing");
+    const full = calculateCategoryScores(manyTests).find((s) => s.name === "testing");
+    expect(none!.percentage).toBe(0);
+    expect(partial!.percentage).toBe(70);
+    expect(full!.percentage).toBe(100);
   });
 
   it("calculates documentation score correctly with all docs present", () => {
@@ -279,7 +292,7 @@ describe("getScoreStatus", () => {
 
   it("uses stricter custom thresholds for scoring categories", () => {
     loadConfig({ scoreThresholds: { excellent: 100, good: 90, fair: 70, poor: 50 } });
-    const report = createMockReport();
+    const report = createMockReport({ testFileCount: 10 });
     const categories = calculateCategoryScores(report);
     expect(categories.every((c) => c.status === "excellent" || c.status === "good")).toBe(true);
     loadConfig();

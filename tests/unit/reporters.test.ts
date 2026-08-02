@@ -56,7 +56,8 @@ function createMockReport(overrides?: Partial<AnalysisReport>): AnalysisReport {
     ],
     biggestFolders: [],
     biggestFiles: [],
-    fileCount: 10,
+fileCount: 10,
+    testFileCount: 4,
     emptyFolders: [],
     duplicateFileNames: [],
     circularImports: [],
@@ -538,7 +539,7 @@ function createMockMultiSummary(): MultiAnalysisSummary {
       npmPackageType: "application", hasChangesetsConfig: false,
     },
     languages: [{ language: "TypeScript", files: 8, lines: 500, percentage: 80 }],
-    biggestFolders: [], biggestFiles: [], fileCount: 10, emptyFolders: [],
+    biggestFolders: [], biggestFiles: [], fileCount: 10, testFileCount: 3, emptyFolders: [],
     duplicateFileNames: [], circularImports: [], dependencyIssues: [], vulnerabilities: [], gitStats: null,
     todoComments: [], hardcodedSecrets: [], largeAssets: [], binaryFiles: [], envFiles: [],
     duplicateCode: [], complexity: [], missingReadme: false, missingLicense: false,
@@ -559,6 +560,7 @@ function createMockMultiSummary(): MultiAnalysisSummary {
     score: 65,
     summary: { ...baseReport.summary, score: 65, totalFiles: 5 },
     fileCount: 5,
+    testFileCount: 2,
   };
 
   return {

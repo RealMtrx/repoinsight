@@ -55,6 +55,7 @@ function createMockReport(overrides?: Partial<AnalysisReport>): AnalysisReport {
     biggestFolders: [],
     biggestFiles: [],
     fileCount: 10,
+    testFileCount: 4,
     emptyFolders: [],
     duplicateFileNames: [],
     circularImports: [],

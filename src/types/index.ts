@@ -258,6 +258,7 @@ export interface AnalysisReport {
   biggestFolders: FolderInfo[];
   biggestFiles: FileInfo[];
   fileCount: number;
+  testFileCount: number;
   emptyFolders: string[];
   duplicateFileNames: DuplicateFileName[];
   circularImports: CircularImport[];

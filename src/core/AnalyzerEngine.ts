@@ -127,6 +127,7 @@ export class AnalyzerEngine {
       biggestFolders: [],
       biggestFiles: [fileInfo],
       fileCount: 1,
+      testFileCount: 0,
       emptyFolders: [],
       duplicateFileNames: [],
       circularImports: [],
@@ -225,6 +226,9 @@ export class AnalyzerEngine {
     const missingTests = !files.some(
       (f) => /\.(test|spec)\./i.test(f.path) || /\b(tests|__tests__|spec)\b/.test(f.path),
     );
+    const testFileCount = files.filter(
+      (f) => /\.(test|spec)\./i.test(f.path) || /\b(tests|__tests__|spec)\b/.test(f.path),
+    ).length;
     const missingCi = !files.some((f) => {
       const normalizedPath = f.path.replace(/\\/g, "/");
       return (
@@ -282,6 +286,7 @@ export class AnalyzerEngine {
       biggestFolders,
       biggestFiles,
       fileCount: files.length,
+      testFileCount,
       emptyFolders,
       duplicateFileNames,
       circularImports,

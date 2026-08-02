@@ -78,13 +78,11 @@ function calculateTestingScore(report: AnalysisReport): CategoryScore {
   let score = 0;
   if (!report.missingTests) {
     score += 50;
-    const testFileRatio =
-      report.fileCount > 0
-        ? report.summary.totalFiles > 0
-          ? (report.fileCount / report.summary.totalFiles) * 50
-          : 0
+    const ratio =
+      report.summary.totalFiles > 0
+        ? Math.min(1, report.testFileCount / report.summary.totalFiles)
         : 0;
-    score += Math.min(50, Math.round(testFileRatio));
+    score += Math.min(50, Math.round(ratio * 50));
   }
   score = capScore(score);
   return {
