@@ -53,16 +53,19 @@ interface AnalysisContext {
 export class AnalyzerEngine {
   private readonly options: AnalysisOptions;
   private readonly scanner: Scanner;
-  private readonly cache: AnalysisCache | null;
+  private cache: AnalysisCache | null = null;
 
   constructor(options: AnalysisOptions) {
     this.options = options;
     this.scanner = new Scanner(options);
-    this.cache = options.useCache ? new AnalysisCache(process.cwd()) : null;
   }
 
   async analyze(projectPath: string, scope?: AnalysisScope): Promise<AnalysisReport> {
     const resolvedScope = scope ?? detectTarget(projectPath);
+    const rootPath = path.resolve(resolvedScope.targetPath);
+    this.cache = this.options.useCache
+      ? new AnalysisCache(resolvedScope.type === "file" ? path.dirname(rootPath) : rootPath)
+      : null;
 
     if (resolvedScope.type === "file") {
       return this.analyzeSingleFile(resolvedScope.targetPath);

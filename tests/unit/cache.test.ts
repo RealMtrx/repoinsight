@@ -167,7 +167,7 @@ describe("AnalysisCache", () => {
       const cacheFile = join(root, ".repoinsight-cache.json");
       const content = require("fs").readFileSync(cacheFile, "utf-8");
       const parsed = JSON.parse(content);
-      expect(parsed.version).toBe(1);
+      expect(parsed.version).toBe(2);
       expect(parsed.files).toBeDefined();
     });
 

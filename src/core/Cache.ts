@@ -1,9 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join, dirname, relative } from "path";
-import { createHash } from "crypto";
 
 interface CacheEntry {
-  hash: string;
   mtimeMs: number;
   size: number;
   data: Record<string, unknown>;
@@ -15,7 +13,7 @@ interface CacheStore {
   files: Record<string, CacheEntry>;
 }
 
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 const CACHE_FILE = ".repoinsight-cache.json";
 
 export class AnalysisCache {
@@ -46,8 +44,7 @@ export class AnalysisCache {
     const relPath = relative(this.rootPath, filePath).replace(/\\/g, "/");
     let entry = this.store.files[relPath];
     if (!entry) {
-      const hash = this.hashFile(filePath, size);
-      entry = { hash, mtimeMs, size, data: {} };
+      entry = { mtimeMs, size, data: {} };
       this.store.files[relPath] = entry;
     } else {
       entry.mtimeMs = mtimeMs;
@@ -78,16 +75,16 @@ export class AnalysisCache {
   }
 
   private removeEntry(relPath: string): void {
-    this.store.files[relPath] = undefined as unknown as CacheEntry;
-  }
-
-  private hashFile(filePath: string, size: number): string {
-    try {
-      const content = readFileSync(filePath, "utf-8").slice(0, 4096);
-      return createHash("md5").update(content).digest("hex").slice(0, 16);
-    } catch {
-      return `size:${size}`;
+    const next: Record<string, CacheEntry> = {};
+    for (const key of Object.keys(this.store.files)) {
+      if (key !== relPath) {
+        const entry = this.store.files[key];
+        if (entry) {
+          next[key] = entry;
+        }
+      }
     }
+    this.store.files = next;
   }
 
   private load(): CacheStore {
