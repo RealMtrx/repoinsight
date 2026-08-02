@@ -665,11 +665,13 @@ export class AnalyzerEngine {
       return null;
     }
 
+    const contributors = getContributors(rootPath);
+
     return {
       commitCount: getCommitCount(rootPath),
       branchCount: getBranchCount(rootPath),
-      contributorCount: getContributors(rootPath).length,
-      contributors: getContributors(rootPath),
+      contributorCount: contributors.length,
+      contributors,
       largestCommits: getLargestCommits(rootPath),
       firstCommitDate: getFirstCommitDate(rootPath),
       lastCommitDate: getLastCommitDate(rootPath),

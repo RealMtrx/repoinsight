@@ -1,9 +1,23 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import type { ContributorInfo, LargeCommit } from "../types/index.js";
+
+const GIT_TIMEOUT_MS = 15_000;
+
+function runGit(repoPath: string, args: string[]): string {
+  const result = execFileSync("git", args, {
+    cwd: repoPath,
+    encoding: "utf-8",
+    stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true,
+    timeout: GIT_TIMEOUT_MS,
+    maxBuffer: 10 * 1024 * 1024,
+  });
+  return result;
+}
 
 export function isGitRepository(repoPath: string): boolean {
   try {
-    execSync("git rev-parse --git-dir", { cwd: repoPath, stdio: "pipe" });
+    runGit(repoPath, ["rev-parse", "--git-dir"]);
     return true;
   } catch {
     return false;
@@ -12,12 +26,7 @@ export function isGitRepository(repoPath: string): boolean {
 
 export function getCommitCount(repoPath: string): number {
   try {
-    const result = execSync("git rev-list --count HEAD 2>nul", {
-      cwd: repoPath,
-      encoding: "utf-8",
-      stdio: "pipe",
-      windowsHide: true,
-    });
+    const result = runGit(repoPath, ["rev-list", "--count", "HEAD"]);
     const trimmed = result.trim();
     return trimmed ? Number.parseInt(trimmed, 10) : 0;
   } catch {
@@ -27,16 +36,10 @@ export function getCommitCount(repoPath: string): number {
 
 export function getBranchCount(repoPath: string): number {
   try {
-    const result = execSync("git branch --list 2>nul", {
-      cwd: repoPath,
-      encoding: "utf-8",
-      stdio: "pipe",
-      windowsHide: true,
-    });
+    const result = runGit(repoPath, ["branch", "--list"]);
     return result
       .trim()
       .split("\n")
-      .filter((l) => l.length > 0)
       .map((l) => l.replace(/^\*\s*/, "").trim())
       .filter(Boolean).length;
   } catch {
@@ -46,12 +49,7 @@ export function getBranchCount(repoPath: string): number {
 
 export function getContributors(repoPath: string): ContributorInfo[] {
   try {
-    const result = execSync('git log --format="%an|%ae" 2>nul', {
-      cwd: repoPath,
-      encoding: "utf-8",
-      stdio: "pipe",
-      windowsHide: true,
-    });
+    const result = runGit(repoPath, ["log", "--format=%an|%ae"]);
     const counts = new Map<string, { name: string; email: string; count: number }>();
     for (const line of result.trim().split("\n")) {
       if (!line) {
@@ -78,13 +76,7 @@ export function getContributors(repoPath: string): ContributorInfo[] {
 
 export function getLargestCommits(repoPath: string, limit = 10): LargeCommit[] {
   try {
-    const rawLog = execSync('git log --all --format="---%n%H|%an|%s|%ai" --shortstat 2>nul', {
-      cwd: repoPath,
-      encoding: "utf-8",
-      maxBuffer: 10 * 1024 * 1024,
-      stdio: "pipe",
-      windowsHide: true,
-    });
+    const rawLog = runGit(repoPath, ["log", "--all", "--format=---%n%H|%an|%s|%ai", "--shortstat"]);
     const commits: LargeCommit[] = [];
     const blocks = rawLog.split("---\n").filter((b) => b.trim().length > 0);
     for (const block of blocks) {
@@ -111,12 +103,7 @@ export function getLargestCommits(repoPath: string, limit = 10): LargeCommit[] {
 
 export function getFirstCommitDate(repoPath: string): string | null {
   try {
-    const result = execSync('git log --reverse --format="%ai" 2>nul', {
-      cwd: repoPath,
-      encoding: "utf-8",
-      stdio: "pipe",
-      windowsHide: true,
-    });
+    const result = runGit(repoPath, ["log", "--reverse", "--format=%ai"]);
     const first = result.trim().split("\n")[0];
     return first ?? null;
   } catch {
@@ -126,12 +113,7 @@ export function getFirstCommitDate(repoPath: string): string | null {
 
 export function getLastCommitDate(repoPath: string): string | null {
   try {
-    const result = execSync('git log -1 --format="%ai" 2>nul', {
-      cwd: repoPath,
-      encoding: "utf-8",
-      stdio: "pipe",
-      windowsHide: true,
-    });
+    const result = runGit(repoPath, ["log", "-1", "--format=%ai"]);
     const trimmed = result.trim();
     return trimmed || null;
   } catch {

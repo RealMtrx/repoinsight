@@ -4,6 +4,9 @@ import {
   getCommitCount,
   getBranchCount,
   getContributors,
+  getLargestCommits,
+  getFirstCommitDate,
+  getLastCommitDate,
 } from "../../src/utils/git.js";
 
 describe("git utils", () => {
@@ -45,5 +48,28 @@ describe("git utils", () => {
     const contributors = getContributors(osTemp);
     expect(Array.isArray(contributors)).toBe(true);
     expect(contributors.length).toBe(0);
+  });
+
+  it("getLargestCommits returns an array", () => {
+    const commits = getLargestCommits(repoPath);
+    expect(Array.isArray(commits)).toBe(true);
+    if (commits.length > 0) {
+      expect(commits[0]).toHaveProperty("hash");
+      expect(commits[0]).toHaveProperty("filesChanged");
+    }
+  });
+
+  it("getFirstCommitDate returns a date string or null", () => {
+    const date = getFirstCommitDate(repoPath);
+    if (date !== null) {
+      expect(date).toMatch(/^\d{4}-\d{2}-\d{2}/);
+    }
+  });
+
+  it("getLastCommitDate returns a date string or null", () => {
+    const date = getLastCommitDate(repoPath);
+    if (date !== null) {
+      expect(date).toMatch(/^\d{4}-\d{2}-\d{2}/);
+    }
   });
 });
