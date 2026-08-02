@@ -27,6 +27,8 @@
 - **4 Report Formats** — terminal (ANSI), HTML (dark theme), Markdown, JSON
 - **Performance** — parallel file scanning, smart caching, incremental analysis
 - **Scoring** — 8-category health score with actionable recommendations
+- **Offline Vulnerability Scan** — local database of known package vulnerabilities checked against
+  resolved dependency versions (`security` command, and included in every report/scoring)
 - **Zero Config** — works out of the box, no configuration needed
 
 ## Install

@@ -412,6 +412,42 @@ export class TerminalReporter {
       console.log(`\n${severity.medium(` ${icons.warn} Dependency Issues`)}\n${table.toString()}`);
     }
 
+    if (report.vulnerabilities?.length) {
+      const table = new Table({
+        head: [
+          severity.medium("Package"),
+          severity.medium("Version"),
+          severity.medium("CVE"),
+          severity.medium("Patched"),
+          severity.medium("Severity"),
+        ],
+        style: { head: [], border: ["red"] },
+        chars: {
+          top: icons.horizontal,
+          "top-mid": icons.teeDown,
+          "top-left": icons.topLeft,
+          "top-right": icons.topRight,
+          bottom: icons.horizontal,
+          "bottom-mid": icons.teeUp,
+          "bottom-left": icons.bottomLeft,
+          "bottom-right": icons.bottomRight,
+          left: icons.vertical,
+          "left-mid": icons.teeRight,
+          mid: icons.horizontal,
+          "mid-mid": icons.crossLine,
+          right: icons.vertical,
+          "right-mid": icons.teeLeft,
+          middle: " ",
+        },
+      });
+      for (const v of report.vulnerabilities.slice(0, 15)) {
+        table.push([v.package, v.installedVersion, v.id, v.patchedVersion, v.severity]);
+      }
+      console.log(
+        `\n${severity.critical(` ${icons.alert} Known Vulnerabilities`)}\n${table.toString()}`,
+      );
+    }
+
     if (report.circularImports?.length) {
       const table = new Table({
         head: [severity.medium("File"), severity.medium("Chain")],

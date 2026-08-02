@@ -64,6 +64,7 @@ describe("ReportModel", () => {
     duplicateFileNames: [],
     circularImports: [],
     dependencyIssues: [],
+    vulnerabilities: [],
     gitStats: null,
     todoComments: [],
     hardcodedSecrets: [],

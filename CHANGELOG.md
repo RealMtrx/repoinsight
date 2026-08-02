@@ -9,6 +9,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Offline vulnerability lookup** — A local database of known package vulnerabilities
+  (`vulnerabilities.ts`) is scanned during analysis. Installed versions are resolved from
+  `package-lock.json` when available, otherwise declared semver ranges are checked for overlap, and
+  matches surface as `VulnerabilityInfo` in the report with CVE id, patched version, and severity
+- **Vulnerability-aware scoring, reporting, and CLI** — `calculateSecurityScore` deducts points for
+  known vulnerabilities; Terminal/Markdown/HTML reporters render a "Known Vulnerabilities" section;
+  the `security` command now surfaces both secrets and vulnerable packages; critical vulnerabilities
+  count toward report issues and generate a recommendation to upgrade
+- **Bundled semver utilities** — `src/utils/versions.ts` implements range parsing (`<`, `<=`, `>`,
+  `>=`, `=`, `^`, `~`, `x`-wildcards, `||`, hyphen, combined constraints) with no external
+  dependency, supporting both exact version checks and range-overlap detection
 - **Configurable rule sets** — Custom severity thresholds (`scoreThresholds` for
   excellent/good/fair/ poor) in config files, applied consistently via `getScoreStatus()`
 - **`.repoinsightignore` support** — Per-project exclusion patterns in gitignore style, merged with
@@ -26,6 +37,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Effective configuration display** — `config` command shows the resolved config source, active
   exclude patterns, max file size, and score weights instead of hardcoded defaults
 - **10 new tests** for config file loading, ignore-file merging, and exclusion expansion
+- **19 new tests** for semver range handling, vulnerability scanning, reporter rendering, and
+  security-score deduction with vulnerabilities
 
 ### Changed
 

@@ -79,6 +79,16 @@ export interface DependencyIssue {
   details: string;
 }
 
+export interface VulnerabilityInfo {
+  package: string;
+  installedVersion: string;
+  affectedVersion: string;
+  patchedVersion: string;
+  severity: "warning" | "critical";
+  id: string;
+  summary: string;
+}
+
 export interface GitStats {
   commitCount: number;
   branchCount: number;
@@ -243,6 +253,7 @@ export interface AnalysisReport {
   duplicateFileNames: DuplicateFileName[];
   circularImports: CircularImport[];
   dependencyIssues: DependencyIssue[];
+  vulnerabilities: VulnerabilityInfo[];
   gitStats: GitStats | null;
   todoComments: TodoComment[];
   hardcodedSecrets: HardcodedSecret[];

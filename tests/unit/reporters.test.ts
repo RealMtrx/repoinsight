@@ -61,6 +61,7 @@ function createMockReport(overrides?: Partial<AnalysisReport>): AnalysisReport {
     duplicateFileNames: [],
     circularImports: [],
     dependencyIssues: [],
+    vulnerabilities: [],
     gitStats: null,
     todoComments: [],
     hardcodedSecrets: [],
@@ -417,6 +418,25 @@ describe("MarkdownReporter", () => {
     expect(result).toContain("Hardcoded Secrets");
   });
 
+  it("contains known vulnerabilities when present", () => {
+    const report = createMockReport({
+      vulnerabilities: [
+        {
+          package: "lodash",
+          installedVersion: "4.17.20",
+          affectedVersion: "<4.17.21",
+          patchedVersion: "4.17.21",
+          severity: "critical",
+          id: "CVE-2021-23337",
+          summary: "Command injection",
+        },
+      ],
+    });
+    const result = reporter.render(report);
+    expect(result).toContain("Vulnerabilities");
+    expect(result).toContain("CVE-2021-23337");
+  });
+
   it("contains TODO comments when present", () => {
     const report = createMockReport({
       todoComments: [{ file: "app.ts", line: 10, type: "TODO", text: "refactor" }],
@@ -501,7 +521,7 @@ function createMockMultiSummary(): MultiAnalysisSummary {
     },
     languages: [{ language: "TypeScript", files: 8, lines: 500, percentage: 80 }],
     biggestFolders: [], biggestFiles: [], fileCount: 10, emptyFolders: [],
-    duplicateFileNames: [], circularImports: [], dependencyIssues: [], gitStats: null,
+    duplicateFileNames: [], circularImports: [], dependencyIssues: [], vulnerabilities: [], gitStats: null,
     todoComments: [], hardcodedSecrets: [], largeAssets: [], binaryFiles: [], envFiles: [],
     duplicateCode: [], complexity: [], missingReadme: false, missingLicense: false,
     missingGitignore: false, missingTests: false, missingCi: false,

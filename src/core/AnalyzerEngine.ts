@@ -12,6 +12,7 @@ import type {
   DuplicateFileName,
   CircularImport,
   DependencyIssue,
+  VulnerabilityInfo,
   GitStats,
   TodoComment,
   HardcodedSecret,
@@ -33,6 +34,7 @@ import {
   getLastCommitDate,
 } from "../utils/git.js";
 import { calculateScore, calculateCategoryScores } from "../utils/scoring.js";
+import { scanForVulnerabilities } from "./vulnerabilities.js";
 import { LANGUAGE_EXTENSIONS, ENV_FILE_NAMES, LARGE_ASSET_EXTENSIONS } from "../constants/index.js";
 
 interface AnalysisContext {
@@ -123,6 +125,7 @@ export class AnalyzerEngine {
       duplicateFileNames: [],
       circularImports: [],
       dependencyIssues: [],
+      vulnerabilities: [],
       gitStats,
       todoComments,
       hardcodedSecrets,
@@ -158,6 +161,7 @@ export class AnalyzerEngine {
         duplicateFileNames: [],
         circularImports: [],
         dependencyIssues: [],
+        vulnerabilities: [],
         todoComments,
         hardcodedSecrets,
         largeAssets: [],
@@ -192,6 +196,7 @@ export class AnalyzerEngine {
     const duplicateFileNames = this.findDuplicateFileNames(files);
     const circularImports = this.findCircularImports(ctx);
     const dependencyIssues = await this.analyzeDependencies(ctx);
+    const vulnerabilities = await this.scanVulnerabilities(ctx);
     const gitStats = this.analyzeGit(rootPath);
     const todoComments = this.findTodoComments(fileContents);
     const hardcodedSecrets = this.findHardcodedSecrets(fileContents);
@@ -237,9 +242,11 @@ export class AnalyzerEngine {
       issues:
         circularImports.length +
         dependencyIssues.filter((d) => d.severity === "critical").length +
+        vulnerabilities.filter((v) => v.severity === "critical").length +
         hardcodedSecrets.length,
       warnings:
         dependencyIssues.filter((d) => d.severity === "warning").length +
+        vulnerabilities.filter((v) => v.severity === "warning").length +
         todoComments.length +
         duplicateFileNames.length +
         emptyFolders.length +
@@ -268,6 +275,7 @@ export class AnalyzerEngine {
       duplicateFileNames,
       circularImports,
       dependencyIssues,
+      vulnerabilities,
       gitStats,
       todoComments,
       hardcodedSecrets,
@@ -304,6 +312,7 @@ export class AnalyzerEngine {
         duplicateFileNames,
         circularImports,
         dependencyIssues,
+        vulnerabilities,
         todoComments,
         hardcodedSecrets,
         largeAssets,
@@ -535,6 +544,10 @@ export class AnalyzerEngine {
       seen.add(key);
       return true;
     });
+  }
+
+  private scanVulnerabilities(ctx: AnalysisContext): Promise<VulnerabilityInfo[]> {
+    return scanForVulnerabilities(ctx.rootPath);
   }
 
   private async analyzeDependencies(ctx: AnalysisContext): Promise<DependencyIssue[]> {
@@ -928,6 +941,7 @@ export class AnalyzerEngine {
     duplicateFileNames: DuplicateFileName[];
     circularImports: CircularImport[];
     dependencyIssues: DependencyIssue[];
+    vulnerabilities: VulnerabilityInfo[];
     todoComments: TodoComment[];
     hardcodedSecrets: HardcodedSecret[];
     largeAssets: LargeAsset[];
@@ -970,6 +984,12 @@ export class AnalyzerEngine {
     if (criticalDeps.length > 0) {
       recommendations.push(
         `Address ${criticalDeps.length} critical dependency issue(s) by installing missing packages or removing unused ones`,
+      );
+    }
+    const criticalVulns = config.vulnerabilities.filter((v) => v.severity === "critical");
+    if (criticalVulns.length > 0) {
+      recommendations.push(
+        `Update ${criticalVulns.length} package(s) with known vulnerabilities (e.g. ${criticalVulns[0]?.package ?? ""}) to their patched versions`,
       );
     }
     if (config.hardcodedSecrets.length > 0) {

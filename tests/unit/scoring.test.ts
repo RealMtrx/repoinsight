@@ -31,6 +31,7 @@ function createMockReport(overrides?: Partial<AnalysisReport>): AnalysisReport {
     duplicateFileNames: [],
     circularImports: [],
     dependencyIssues: [],
+    vulnerabilities: [],
     gitStats: null,
     todoComments: [],
     hardcodedSecrets: [],
@@ -111,6 +112,28 @@ describe("calculateCategoryScores", () => {
     const cleanSec = cleanScores.find((s) => s.name === "security")!.percentage;
     const dirtySec = dirtyScores.find((s) => s.name === "security")!.percentage;
     expect(dirtySec).toBeLessThan(cleanSec);
+  });
+
+  it("calculates security score lower with known vulnerabilities", () => {
+    const clean = createMockReport();
+    const vulnerable = createMockReport({
+      vulnerabilities: [
+        {
+          package: "lodash",
+          installedVersion: "4.17.20",
+          affectedVersion: "<4.17.21",
+          patchedVersion: "4.17.21",
+          severity: "critical",
+          id: "CVE-2021-23337",
+          summary: "Command injection",
+        },
+      ],
+    });
+    const cleanScores = calculateCategoryScores(clean);
+    const vulnScores = calculateCategoryScores(vulnerable);
+    const cleanSec = cleanScores.find((s) => s.name === "security")!.percentage;
+    const vulnSec = vulnScores.find((s) => s.name === "security")!.percentage;
+    expect(vulnSec).toBeLessThan(cleanSec);
   });
 
   it("calculates structure score lower with empty folders", () => {

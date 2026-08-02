@@ -134,6 +134,9 @@ function calculateSecurityScore(report: AnalysisReport): CategoryScore {
   for (const _ of report.hardcodedSecrets) {
     score -= 20;
   }
+  for (const vuln of report.vulnerabilities ?? []) {
+    score -= vuln.severity === "critical" ? 20 : 10;
+  }
   if (report.envFiles.length > 0) {
     score -= 10;
   }

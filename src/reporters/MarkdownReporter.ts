@@ -231,6 +231,17 @@ export class MarkdownReporter {
         p.push(`| ${d.name} | ${d.type} | ${d.severity} |`);
       }
     }
+    if (r.vulnerabilities.length) {
+      p.push("### 🛡️ Known Vulnerabilities\n");
+      p.push(
+        "| Package | Version | CVE | Patched | Severity |\n|---------|---------|-----|---------|----------|",
+      );
+      for (const v of r.vulnerabilities.slice(0, 15)) {
+        p.push(
+          `| ${v.package} | ${v.installedVersion} | ${v.id} | ${v.patchedVersion} | ${v.severity} |`,
+        );
+      }
+    }
     if (r.circularImports.length) {
       p.push("### 🔄 Circular Imports\n");
       p.push("| File | Chain |\n|------|-------|");

@@ -248,6 +248,16 @@ export class HtmlReporter {
         );
       }
     }
+    if (report.vulnerabilities.length) {
+      p.push(
+        `<h3 style="margin:16px 0 8px">Vulnerabilities <span class="badge" style="background:${C.error}22;color:${C.error}">${report.vulnerabilities.length}</span></h3>`,
+      );
+      for (const v of report.vulnerabilities.slice(0, 15)) {
+        p.push(
+          `<div class="issue issue-crit"><strong>${this.esc(v.package)}</strong> ${this.esc(v.installedVersion)} — <code>${this.esc(v.id)}</code> → patched ${this.esc(v.patchedVersion)}</div>`,
+        );
+      }
+    }
     if (report.circularImports.length) {
       p.push(
         `<h3 style="margin:16px 0 8px">Circular Imports <span class="badge" style="background:${C.error}22;color:${C.error}">${report.circularImports.length}</span></h3>`,

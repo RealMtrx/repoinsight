@@ -29,24 +29,39 @@ const def: CommandDefinition = {
         spinner.succeed(" Security audit complete");
 
         const secrets = report.hardcodedSecrets ?? [];
+        const vulnerabilities = report.vulnerabilities ?? [];
 
-        if (secrets.length === 0) {
+        if (secrets.length === 0 && vulnerabilities.length === 0) {
           console.log(theme.success(`\n${icons.checkCircle} No security issues detected`));
           return;
         }
 
-        console.log(
-          createBox(
-            secrets.map(
+        const findings: string[] = [];
+
+        if (secrets.length > 0) {
+          findings.push(
+            ...secrets.map(
               (s) =>
-                `${severity.critical(icons.alert)} ${styles.path(s.file)} ${styles.label(`line ${s.line}`)}\n   ${theme.muted(s.type)}`,
+                `${severity.critical(icons.alert)} ${styles.path(s.file)} ${styles.label(`line ${s.line}`)}`,
             ),
-            {
-              title: " Security Findings",
-              width: Math.min(terminalWidth(), 72),
-              borderColor: theme.error,
-            },
-          ),
+          );
+        }
+
+        if (vulnerabilities.length > 0) {
+          findings.push("", severity.critical(`${icons.alert} Known Vulnerabilities`));
+          for (const v of vulnerabilities) {
+            findings.push(
+              `${v.severity === "critical" ? theme.error(icons.cross) : theme.warning(icons.warn)} ${styles.code(v.package)} v${v.installedVersion} ${styles.label(v.id)} → upgrade to v${v.patchedVersion}`,
+            );
+          }
+        }
+
+        console.log(
+          createBox(findings, {
+            title: " Security Findings",
+            width: Math.min(terminalWidth(), 72),
+            borderColor: theme.error,
+          }),
         );
       });
   },
