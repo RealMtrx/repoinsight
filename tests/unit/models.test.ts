@@ -77,6 +77,8 @@ describe("ReportModel", () => {
     performanceIssues: [],
     missingReadme: false,
     missingLicense: false,
+    licenseSpdx: "MIT",
+    licenseName: "MIT License",
     missingGitignore: false,
     missingTests: false,
     missingCi: false,

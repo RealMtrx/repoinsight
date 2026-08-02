@@ -26,6 +26,7 @@ import type {
 import { Detector } from "../detection/index.js";
 import { detectTarget } from "../utils/detectTarget.js";
 import { countLines, mapLimit } from "../utils/file.js";
+import { getProjectLicense } from "../utils/license.js";
 import {
   isGitRepository,
   getCommitCount,
@@ -149,6 +150,8 @@ export class AnalyzerEngine {
       performanceIssues: [],
       missingReadme: false,
       missingLicense: false,
+      licenseSpdx: null,
+      licenseName: null,
       missingGitignore: false,
       missingTests: false,
       missingCi: false,
@@ -226,7 +229,11 @@ export class AnalyzerEngine {
     const projectSize = files.reduce((sum, f) => sum + f.size, 0);
 
     const missingReadme = !files.some((f) => /^readme\./i.test(path.basename(f.path)));
-    const missingLicense = !files.some((f) => /^license/i.test(path.basename(f.path)));
+    const detectedLicense = getProjectLicense(rootPath);
+    const missingLicense =
+      detectedLicense.file === null &&
+      detectedLicense.name === null &&
+      detectedLicense.spdx === null;
     const missingGitignore = !files.some((f) => path.basename(f.path) === ".gitignore");
     const missingTests = !files.some(
       (f) => /\.(test|spec)\./i.test(f.path) || /\b(tests|__tests__|spec)\b/.test(f.path),
@@ -307,6 +314,8 @@ export class AnalyzerEngine {
       performanceIssues,
       missingReadme,
       missingLicense,
+      licenseSpdx: detectedLicense.spdx,
+      licenseName: detectedLicense.name,
       missingGitignore,
       missingTests,
       missingCi,

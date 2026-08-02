@@ -142,6 +142,11 @@ export class TerminalReporter {
       `${styles.label("Branches:")}  ${styles.number(s.branches)}`,
       `${styles.label("Score:")}     ${this.scoreColor(s.score)(`${s.score}/100`)}`,
     );
+    if (report.licenseName || report.licenseSpdx) {
+      lines.push(
+        `${styles.label("License:")}   ${theme.success(report.licenseSpdx ?? report.licenseName ?? "")}`,
+      );
+    }
     return this.simpleBox(lines, " Summary ");
   }
 

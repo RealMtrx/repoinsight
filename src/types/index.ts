@@ -275,6 +275,8 @@ export interface AnalysisReport {
   performanceIssues: PerformanceIssue[];
   missingReadme: boolean;
   missingLicense: boolean;
+  licenseSpdx: string | null;
+  licenseName: string | null;
   missingGitignore: boolean;
   missingTests: boolean;
   missingCi: boolean;

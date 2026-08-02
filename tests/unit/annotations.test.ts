@@ -72,6 +72,8 @@ function createMockReport(overrides?: Partial<AnalysisReport>): AnalysisReport {
     performanceIssues: [],
     missingReadme: false,
     missingLicense: false,
+    licenseSpdx: "MIT",
+    licenseName: "MIT License",
     missingGitignore: false,
     missingTests: false,
     missingCi: false,
