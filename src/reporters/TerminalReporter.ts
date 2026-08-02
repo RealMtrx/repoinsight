@@ -1,10 +1,11 @@
-import Table from "cli-table3";
 import type { AnalysisReport, CategoryScore, MultiAnalysisSummary } from "../types/index.js";
 import { APP_NAME } from "../constants/index.js";
 import { formatFileSize } from "../utils/file.js";
 import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
 import { theme, styles, icons, severity } from "../tui/index.js";
 import { terminalWidth, repeat, formatDuration } from "../tui/utils.js";
+import { createTable } from "./table.js";
+import { grade, scoreColor } from "../utils/grades.js";
 
 export class TerminalReporter {
   render(report: AnalysisReport): void {
@@ -14,6 +15,8 @@ export class TerminalReporter {
     console.log(this.renderTechnologies(report.technologies));
     console.log(this.renderCategoryScores(report.categoryScores));
     console.log(this.renderLanguages(report.languages));
+    console.log(this.renderLargestFiles(report));
+    console.log(this.renderComplexity(report));
     console.log(this.renderGitStats(report));
     this.renderIssues(report);
     console.log(this.renderRecommendations(report.recommendations));
@@ -27,11 +30,12 @@ export class TerminalReporter {
     const bottom = `${border(icons.bottomLeft)}${border(repeat(icons.horizontal, w))}${border(icons.bottomRight)}`;
     const title = `${theme.primary(icons.diamond + " " + APP_NAME)} ${styles.subheading("Multi-Path Analysis")}`;
 
-    const grade = (s: number): string =>
-      s >= 90 ? "A" : s >= 80 ? "B" : s >= 65 ? "C" : s >= 50 ? "D" : "F";
-
     const gradeColor = (s: number): ((t: string) => string) =>
-      s >= 80 ? severity.success : s >= 60 ? severity.medium : severity.high;
+      scoreColor(s) === "success"
+        ? severity.success
+        : scoreColor(s) === "medium"
+          ? severity.medium
+          : severity.high;
 
     const totalTargets = summary.results.length;
     const succeeded = summary.results.filter((r) => r.report && !r.error);
@@ -204,27 +208,10 @@ export class TerminalReporter {
   }
 
   private renderCategoryScores(scores: CategoryScore[]): string {
-    const table = new Table({
-      head: [styles.label("Category"), styles.label("Score"), styles.label("Status")],
-      style: { head: [], border: ["grey"] },
-      chars: {
-        top: icons.horizontal,
-        "top-mid": icons.teeDown,
-        "top-left": icons.topLeft,
-        "top-right": icons.topRight,
-        bottom: icons.horizontal,
-        "bottom-mid": icons.teeUp,
-        "bottom-left": icons.bottomLeft,
-        "bottom-right": icons.bottomRight,
-        left: icons.vertical,
-        "left-mid": icons.teeRight,
-        mid: icons.horizontal,
-        "mid-mid": icons.crossLine,
-        right: icons.vertical,
-        "right-mid": icons.teeLeft,
-        middle: " ",
-      },
-    });
+    const table = createTable(
+      [styles.label("Category"), styles.label("Score"), styles.label("Status")],
+      "grey",
+    );
     for (const cat of scores) {
       const statusIcon = this.statusIcon(cat.status);
       table.push([
@@ -242,31 +229,43 @@ export class TerminalReporter {
     if (!languages.length) {
       return "";
     }
-    const table = new Table({
-      head: [styles.label("Language"), styles.label("Files"), styles.label("Share")],
-      style: { head: [], border: ["grey"] },
-      chars: {
-        top: icons.horizontal,
-        "top-mid": icons.teeDown,
-        "top-left": icons.topLeft,
-        "top-right": icons.topRight,
-        bottom: icons.horizontal,
-        "bottom-mid": icons.teeUp,
-        "bottom-left": icons.bottomLeft,
-        "bottom-right": icons.bottomRight,
-        left: icons.vertical,
-        "left-mid": icons.teeRight,
-        mid: icons.horizontal,
-        "mid-mid": icons.crossLine,
-        right: icons.vertical,
-        "right-mid": icons.teeLeft,
-        middle: " ",
-      },
-    });
+    const table = createTable(
+      [styles.label("Language"), styles.label("Files"), styles.label("Share")],
+      "grey",
+    );
     for (const lang of languages.slice(0, 10)) {
       table.push([lang.language, String(lang.files), `${lang.percentage}%`]);
     }
     return `\n${styles.subheading(` ${icons.arrow} Languages`)}\n${table.toString()}`;
+  }
+
+  private renderLargestFiles(report: AnalysisReport): string {
+    if (!report.biggestFiles?.length) {
+      return "";
+    }
+    const table = createTable(
+      [styles.label("File"), styles.label("Lines"), styles.label("Size")],
+      "grey",
+    );
+    for (const f of report.biggestFiles.slice(0, 10)) {
+      table.push([f.path, String(f.lines), formatFileSize(f.size)]);
+    }
+    return `\n${styles.subheading(` ${icons.arrow} Largest Files`)}\n${table.toString()}`;
+  }
+
+  private renderComplexity(report: AnalysisReport): string {
+    const complex = (report.complexity ?? []).filter((c) => c.cyclomaticComplexity > 10);
+    if (!complex.length) {
+      return "";
+    }
+    const table = createTable(
+      [styles.label("File"), styles.label("Lines"), styles.label("Complexity")],
+      "grey",
+    );
+    for (const c of complex.slice(0, 10)) {
+      table.push([c.file, String(c.linesOfCode), String(c.cyclomaticComplexity)]);
+    }
+    return `\n${styles.subheading(` ${icons.arrow} Complex Code`)}\n${table.toString()}`;
   }
 
   private renderGitStats(report: AnalysisReport): string {
@@ -280,27 +279,10 @@ export class TerminalReporter {
       `${styles.label("Contributors:")} ${styles.number(git.contributorCount)}`,
     ];
     if (git.largestCommits?.length) {
-      const table = new Table({
-        head: [styles.label("Author"), styles.label("Message"), styles.label("Files")],
-        style: { head: [], border: ["grey"] },
-        chars: {
-          top: icons.horizontal,
-          "top-mid": icons.teeDown,
-          "top-left": icons.topLeft,
-          "top-right": icons.topRight,
-          bottom: icons.horizontal,
-          "bottom-mid": icons.teeUp,
-          "bottom-left": icons.bottomLeft,
-          "bottom-right": icons.bottomRight,
-          left: icons.vertical,
-          "left-mid": icons.teeRight,
-          mid: icons.horizontal,
-          "mid-mid": icons.crossLine,
-          right: icons.vertical,
-          "right-mid": icons.teeLeft,
-          middle: " ",
-        },
-      });
+      const table = createTable(
+        [styles.label("Author"), styles.label("Message"), styles.label("Files")],
+        "grey",
+      );
       for (const c of git.largestCommits.slice(0, 5)) {
         table.push([c.author, c.message.slice(0, 50), String(c.filesChanged)]);
       }
@@ -311,32 +293,15 @@ export class TerminalReporter {
 
   private renderIssues(report: AnalysisReport): void {
     if (report.hardcodedSecrets?.length) {
-      const table = new Table({
-        head: [
+      const table = createTable(
+        [
           severity.high("File"),
           severity.high("Line"),
           severity.high("Type"),
           severity.high("Context"),
         ],
-        style: { head: [], border: ["red"] },
-        chars: {
-          top: icons.horizontal,
-          "top-mid": icons.teeDown,
-          "top-left": icons.topLeft,
-          "top-right": icons.topRight,
-          bottom: icons.horizontal,
-          "bottom-mid": icons.teeUp,
-          "bottom-left": icons.bottomLeft,
-          "bottom-right": icons.bottomRight,
-          left: icons.vertical,
-          "left-mid": icons.teeRight,
-          mid: icons.horizontal,
-          "mid-mid": icons.crossLine,
-          right: icons.vertical,
-          "right-mid": icons.teeLeft,
-          middle: " ",
-        },
-      });
+        "red",
+      );
       for (const s of report.hardcodedSecrets.slice(0, 10)) {
         table.push([s.file, String(s.line), s.type, s.context.slice(0, 60)]);
       }
@@ -346,32 +311,15 @@ export class TerminalReporter {
     }
 
     if (report.todoComments?.length) {
-      const table = new Table({
-        head: [
+      const table = createTable(
+        [
           severity.medium("File"),
           severity.medium("Line"),
           severity.medium("Type"),
           severity.medium("Text"),
         ],
-        style: { head: [], border: ["yellow"] },
-        chars: {
-          top: icons.horizontal,
-          "top-mid": icons.teeDown,
-          "top-left": icons.topLeft,
-          "top-right": icons.topRight,
-          bottom: icons.horizontal,
-          "bottom-mid": icons.teeUp,
-          "bottom-left": icons.bottomLeft,
-          "bottom-right": icons.bottomRight,
-          left: icons.vertical,
-          "left-mid": icons.teeRight,
-          mid: icons.horizontal,
-          "mid-mid": icons.crossLine,
-          right: icons.vertical,
-          "right-mid": icons.teeLeft,
-          middle: " ",
-        },
-      });
+        "yellow",
+      );
       for (const t of report.todoComments.slice(0, 20)) {
         table.push([t.file, String(t.line), t.type, t.text.slice(0, 60)]);
       }
@@ -381,31 +329,10 @@ export class TerminalReporter {
     }
 
     if (report.dependencyIssues?.length) {
-      const table = new Table({
-        head: [
-          severity.medium("Dependency"),
-          severity.medium("Issue"),
-          severity.medium("Severity"),
-        ],
-        style: { head: [], border: ["yellow"] },
-        chars: {
-          top: icons.horizontal,
-          "top-mid": icons.teeDown,
-          "top-left": icons.topLeft,
-          "top-right": icons.topRight,
-          bottom: icons.horizontal,
-          "bottom-mid": icons.teeUp,
-          "bottom-left": icons.bottomLeft,
-          "bottom-right": icons.bottomRight,
-          left: icons.vertical,
-          "left-mid": icons.teeRight,
-          mid: icons.horizontal,
-          "mid-mid": icons.crossLine,
-          right: icons.vertical,
-          "right-mid": icons.teeLeft,
-          middle: " ",
-        },
-      });
+      const table = createTable(
+        [severity.medium("Dependency"), severity.medium("Issue"), severity.medium("Severity")],
+        "yellow",
+      );
       for (const d of report.dependencyIssues.slice(0, 15)) {
         table.push([d.name, d.type, d.severity]);
       }
@@ -413,33 +340,16 @@ export class TerminalReporter {
     }
 
     if (report.vulnerabilities?.length) {
-      const table = new Table({
-        head: [
+      const table = createTable(
+        [
           severity.medium("Package"),
           severity.medium("Version"),
           severity.medium("CVE"),
           severity.medium("Patched"),
           severity.medium("Severity"),
         ],
-        style: { head: [], border: ["red"] },
-        chars: {
-          top: icons.horizontal,
-          "top-mid": icons.teeDown,
-          "top-left": icons.topLeft,
-          "top-right": icons.topRight,
-          bottom: icons.horizontal,
-          "bottom-mid": icons.teeUp,
-          "bottom-left": icons.bottomLeft,
-          "bottom-right": icons.bottomRight,
-          left: icons.vertical,
-          "left-mid": icons.teeRight,
-          mid: icons.horizontal,
-          "mid-mid": icons.crossLine,
-          right: icons.vertical,
-          "right-mid": icons.teeLeft,
-          middle: " ",
-        },
-      });
+        "red",
+      );
       for (const v of report.vulnerabilities.slice(0, 15)) {
         table.push([v.package, v.installedVersion, v.id, v.patchedVersion, v.severity]);
       }
@@ -449,32 +359,15 @@ export class TerminalReporter {
     }
 
     if (report.performanceIssues?.length) {
-      const table = new Table({
-        head: [
+      const table = createTable(
+        [
           severity.medium("File"),
           severity.medium("Issue"),
           severity.medium("Value"),
           severity.medium("Severity"),
         ],
-        style: { head: [], border: ["yellow"] },
-        chars: {
-          top: icons.horizontal,
-          "top-mid": icons.teeDown,
-          "top-left": icons.topLeft,
-          "top-right": icons.topRight,
-          bottom: icons.horizontal,
-          "bottom-mid": icons.teeUp,
-          "bottom-left": icons.bottomLeft,
-          "bottom-right": icons.bottomRight,
-          left: icons.vertical,
-          "left-mid": icons.teeRight,
-          mid: icons.horizontal,
-          "mid-mid": icons.crossLine,
-          right: icons.vertical,
-          "right-mid": icons.teeLeft,
-          middle: " ",
-        },
-      });
+        "yellow",
+      );
       for (const p of report.performanceIssues.slice(0, 15)) {
         table.push([p.file, p.type, `${p.value} (limit ${p.limit})`, p.severity]);
       }
@@ -484,27 +377,7 @@ export class TerminalReporter {
     }
 
     if (report.circularImports?.length) {
-      const table = new Table({
-        head: [severity.medium("File"), severity.medium("Chain")],
-        style: { head: [], border: ["yellow"] },
-        chars: {
-          top: icons.horizontal,
-          "top-mid": icons.teeDown,
-          "top-left": icons.topLeft,
-          "top-right": icons.topRight,
-          bottom: icons.horizontal,
-          "bottom-mid": icons.teeUp,
-          "bottom-left": icons.bottomLeft,
-          "bottom-right": icons.bottomRight,
-          left: icons.vertical,
-          "left-mid": icons.teeRight,
-          mid: icons.horizontal,
-          "mid-mid": icons.crossLine,
-          right: icons.vertical,
-          "right-mid": icons.teeLeft,
-          middle: " ",
-        },
-      });
+      const table = createTable([severity.medium("File"), severity.medium("Chain")], "yellow");
       for (const c of report.circularImports.slice(0, 10)) {
         table.push([c.file, c.chain.slice(0, 5).join(" → ")]);
       }
@@ -538,10 +411,11 @@ export class TerminalReporter {
   }
 
   private scoreColor(score: number): (s: string) => string {
-    if (score >= 80) {
+    const c = scoreColor(score);
+    if (c === "success") {
       return severity.success;
     }
-    if (score >= 60) {
+    if (c === "medium") {
       return severity.medium;
     }
     return severity.high;

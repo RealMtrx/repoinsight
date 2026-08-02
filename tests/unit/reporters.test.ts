@@ -115,6 +115,36 @@ describe("TerminalReporter", () => {
     expect(() => reporter.render(report)).not.toThrow();
   });
 
+  it("renders largest files section", () => {
+    const report = createMockReport({
+      biggestFiles: [
+        { path: "src/big.ts", size: 8_000, lines: 900, extension: ".ts", isBinary: false },
+      ],
+    });
+    reporter.render(report);
+    const calls = consoleLogSpy.mock.calls.map((c) => c[0]).join("");
+    expect(calls).toContain("Largest Files");
+    expect(calls).toContain("src/big.ts");
+  });
+
+  it("renders complex code section", () => {
+    const report = createMockReport({
+      complexity: [
+        {
+          file: "src/nested.ts",
+          linesOfCode: 200,
+          cyclomaticComplexity: 18,
+          functionCount: 4,
+          maxNestingDepth: 5,
+        },
+      ],
+    });
+    reporter.render(report);
+    const calls = consoleLogSpy.mock.calls.map((c) => c[0]).join("");
+    expect(calls).toContain("Complex Code");
+    expect(calls).toContain("src/nested.ts");
+  });
+
   it("renders header with project name", () => {
     const report = createMockReport();
     reporter.render(report);

@@ -2,6 +2,7 @@ import type { AnalysisReport, MultiAnalysisSummary } from "../types/index.js";
 import { formatFileSize } from "../utils/file.js";
 import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
 import { getScoreStatus } from "../utils/scoring.js";
+import { grade } from "../utils/grades.js";
 
 const C = {
   bg: "#1A1A2E",
@@ -310,9 +311,6 @@ export class HtmlReporter {
   }
 
   renderMulti(summary: MultiAnalysisSummary): string {
-    const grade = (sc: number): string =>
-      sc >= 90 ? "A" : sc >= 80 ? "B" : sc >= 65 ? "C" : sc >= 50 ? "D" : "F";
-
     const gradeColor = (sc: number): string =>
       sc >= 80 ? C.success : sc >= 60 ? C.warning : C.error;
 

@@ -1,6 +1,7 @@
 import type { AnalysisReport, MultiAnalysisSummary } from "../types/index.js";
 import { formatFileSize } from "../utils/file.js";
 import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
+import { grade } from "../utils/grades.js";
 
 export class MarkdownReporter {
   render(report: AnalysisReport): string {
@@ -42,9 +43,6 @@ export class MarkdownReporter {
         `${summary.repositories} repositories, ${summary.directories} directories, ${summary.files} files\n`,
     );
     s.push(`> Total files scanned: ${summary.totalFiles}\n`);
-
-    const grade = (sc: number): string =>
-      sc >= 90 ? "A" : sc >= 80 ? "B" : sc >= 65 ? "C" : sc >= 50 ? "D" : "F";
 
     s.push("## Summary\n");
     s.push("| Metric | Value |");
