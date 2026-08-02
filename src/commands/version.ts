@@ -5,7 +5,7 @@ import { APP_NAME, APP_VERSION } from "../constants/index.js";
 
 const def: CommandDefinition = {
   name: "version",
-  aliases: ["v", "--version"],
+  aliases: ["ver"],
   description: "Display repoinsight version",
   helpText: "Show the current installed version of repoinsight",
   category: "Utilities",

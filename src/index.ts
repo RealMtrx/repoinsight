@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { Command, CommanderError } from "commander";
 import { APP_NAME, APP_VERSION, APP_DESCRIPTION } from "./constants/index.js";
 import { theme, styles, icons, createBox, terminalWidth } from "./tui/index.js";
 
@@ -32,6 +32,7 @@ export async function run(): Promise<void> {
     .description(APP_DESCRIPTION)
     .version(APP_VERSION, "-v, --version", "output version information")
     .helpOption("-h, --help", "display help information")
+    .option("--debug", "print full error stack traces")
     .configureHelp({ sortSubcommands: true, showGlobalOptions: true })
     .exitOverride();
 
@@ -42,6 +43,7 @@ export async function run(): Promise<void> {
       .description(def.description)
       .helpOption("-h, --help", "display help for command")
       .aliases(def.aliases)
+      .option("--debug", "print full error stack traces")
       .exitOverride();
     def.setup(cmd);
     program.addCommand(cmd);
@@ -60,7 +62,15 @@ export async function run(): Promise<void> {
     return;
   }
 
-  await program.parseAsync(process.argv);
+  try {
+    await program.parseAsync(process.argv);
+  } catch (error) {
+    if (error instanceof CommanderError) {
+      process.exitCode = error.exitCode;
+      return;
+    }
+    throw error;
+  }
 }
 
 function showGeneralHelp(): void {
