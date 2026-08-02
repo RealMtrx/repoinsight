@@ -93,6 +93,24 @@ repoinsight
 | `update`      | `u`, `upgrade` | Check for updates                    |
 | `help`        | `h`, `?`       | Show help                            |
 
+### License detection
+
+The `licenses` command detects the project license from a `LICENSE`/`COPYING`/`UNLICENSE` file or
+the `license` field in `package.json`, recognizing common SPDX identifiers (MIT, Apache-2.0, BSD,
+GPL, ISC, MPL-2.0, ...). The detected SPDX id also appears in every report's summary and the
+interactive TUI.
+
+```bash
+# Show the project license
+repoinsight licenses
+
+# Include dependency licenses from node_modules
+repoinsight licenses --deps
+
+# Machine-readable output
+repoinsight licenses --json
+```
+
 ## Configuration
 
 repoinsight works out of the box with zero configuration. Optional config is loaded from:

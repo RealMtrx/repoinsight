@@ -41,7 +41,6 @@
     "dev": "tsup --watch",
     "lint": "eslint src/ --ext .ts,.tsx --max-warnings 0",
     "lint:fix": "eslint src/ --ext .ts,.tsx --fix",
-    "test:coverage": "vitest run --coverage",
     "format": "prettier --write \"src/**/*.{ts,tsx}\" \"tests/**/*.ts\" \"*.json\" \"*.md\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"tests/**/*.ts\" \"*.json\" \"*.md\"",
     "test": "vitest run",

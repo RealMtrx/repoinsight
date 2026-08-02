@@ -61,6 +61,57 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Version mismatch** — `APP_VERSION` in `constants/index.ts` was stale (`1.3.0`) while the package
   was at `1.4.0`; version output is now consistent
 
+## [1.5.0] — Unreleased
+
+### Added
+
+- **SPDX license detection** — `src/utils/license.ts` finds a project license (LICENSE, LICENSE.md,
+  COPYING, UNLICENSE, etc.), recognizes SPDX identifiers from license text (MIT, Apache-2.0, BSD,
+  GPL, LGPL, ISC, MPL-2.0, Unlicense, WTFPL, ...) and falls back to the `license` field in
+  `package.json`. `licenseSpdx`/`licenseName` are added to the report and shown in the terminal
+  summary and interactive TUI
+- **Enriched `licenses` command** — Detects the project license (file or package.json), lists
+  dependency licenses from `node_modules/` with `--deps`, and supports `--json` export
+- **Coverage tooling** — Installed `@vitest/coverage-v8` and added a `test:coverage` script with
+  real (attainable) thresholds
+- **14 tests** — new `license.test.ts` and `tui.test.ts` suites (SPDX detection, box/wrap/truncate
+  edge cases, progress/panel rendering)
+
+### Changed
+
+- **Analysis performance** — File loading is now bounded via `mapLimit` (concurrency 64) instead of
+  unbounded `Promise.all`; import resolution is memoized per `(filePath, specifier)`; the unused
+  full-tree walk for `folderStructure` was removed; the dependency scanner now builds a single set
+  of used packages instead of concatenating all source and re-scanning it per dependency
+- **Linting and formatting cover `.tsx`** — `npm run lint`, `lint:fix`, `format`, and `format:check`
+  now include the interactive TUI (`src/**/*.{ts,tsx}`), and lint-staged runs ESLint/Prettier on
+  staged TUI files
+- **CLI exit codes** — `repoinsight --help`/`--version` exit `0`, unknown commands exit `1`, and
+  `--debug` no longer fails as an unknown option
+- **Reporters** — shared table styling (`src/reporters/table.ts`) and grade helpers
+  (`src/utils/grades.ts`) deduplicate Terminal/Markdown/HTML rendering; terminal report gained
+  "Largest Files" and "Complexity" sections
+
+### Fixed
+
+- **Testing score** — `calculateTestingScore()` used `fileCount / totalFiles` (always 1.0); it now
+  scores from the real test-file ratio
+- **Git access on Windows** — replaced `execSync` with `2>nul` (non-portable) with `execFileSync`
+  - 15s timeout; removed a duplicated `getContributors()` call during git analysis
+- **Cache** — line counts are consistent between cached and fresh reads; the cache is scoped to the
+  analyzed project instead of the working directory; `cache create`/`cache delete` were replaced
+  with a real `cache` command (list/`--clear`)
+- **Dependency detection** — `analyzeDependencies` no longer flags packages that are only referenced
+  in source as missing, and reports unused deps accurately
+- **TUI edge cases** — box titles longer than the box width no longer throw (`RangeError`); long
+  words are hard-wrapped instead of overflowing; `truncate` returns at most `maxLength` visible
+  characters even with a multi-character ellipsis
+
+### Removed
+
+- **Dead code** — 16 unused command wrappers (`export function *Command()`), `renderMultiOutput`,
+  the `CommandSchema` enum, and `fileExists`/`getFileSize`/`readFileContent` utilities
+
 ## [1.4.0] — 2026-07-28
 
 ### Added
