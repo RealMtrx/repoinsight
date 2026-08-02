@@ -1,4 +1,4 @@
-import { Command } from "commander";
+﻿import { Command } from "commander";
 import { register } from "./registry.js";
 import type { CommandDefinition } from "./types.js";
 
@@ -35,7 +35,3 @@ const def: CommandDefinition = {
 };
 
 register(def);
-
-export function updateCommand(cmd: Command): void {
-  def.setup(cmd);
-}

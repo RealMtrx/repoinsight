@@ -13,14 +13,3 @@ export const AnalysisOptionsSchema = z.object({
 });
 
 export const ReportFormatSchema = z.enum(["terminal", "json", "markdown", "html"]);
-
-export const CommandSchema = z.enum([
-  "scan",
-  "report",
-  "doctor",
-  "json",
-  "markdown",
-  "html",
-  "version",
-  "help",
-]);

@@ -1,4 +1,4 @@
-import { Command } from "commander";
+﻿import { Command } from "commander";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { register } from "./registry.js";
@@ -78,10 +78,6 @@ const def: CommandDefinition = {
 };
 
 register(def);
-
-export function configCommand(cmd: Command): void {
-  def.setup(cmd);
-}
 
 function detectConfigSource(dir: string): string {
   const candidates: [string, string][] = [

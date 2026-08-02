@@ -1,4 +1,4 @@
-import type { CommandDefinition } from "./types.js";
+﻿import type { CommandDefinition } from "./types.js";
 import { theme, styles, icons } from "../tui/index.js";
 
 const definitions = new Map<string, CommandDefinition>();

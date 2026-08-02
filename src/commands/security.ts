@@ -1,4 +1,4 @@
-import { Command } from "commander";
+﻿import { Command } from "commander";
 import { register } from "./registry.js";
 import type { CommandDefinition } from "./types.js";
 
@@ -51,7 +51,7 @@ const def: CommandDefinition = {
           findings.push("", severity.critical(`${icons.alert} Known Vulnerabilities`));
           for (const v of vulnerabilities) {
             findings.push(
-              `${v.severity === "critical" ? theme.error(icons.cross) : theme.warning(icons.warn)} ${styles.code(v.package)} v${v.installedVersion} ${styles.label(v.id)} → upgrade to v${v.patchedVersion}`,
+              `${v.severity === "critical" ? theme.error(icons.cross) : theme.warning(icons.warn)} ${styles.code(v.package)} v${v.installedVersion} ${styles.label(v.id)} â†’ upgrade to v${v.patchedVersion}`,
             );
           }
         }
@@ -68,7 +68,3 @@ const def: CommandDefinition = {
 };
 
 register(def);
-
-export function securityCommand(cmd: Command): void {
-  def.setup(cmd);
-}

@@ -2,27 +2,9 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { BINARY_EXTENSIONS } from "../constants/index.js";
 
-export async function fileExists(filePath: string): Promise<boolean> {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 export function isBinaryFile(filePath: string): boolean {
   const ext = path.extname(filePath).toLowerCase();
   return BINARY_EXTENSIONS.has(ext);
-}
-
-export async function getFileSize(filePath: string): Promise<number> {
-  const stats = await fs.stat(filePath);
-  return stats.size;
-}
-
-export async function readFileContent(filePath: string): Promise<string> {
-  return fs.readFile(filePath, "utf-8");
 }
 
 const FILE_SIZE_UNITS = ["B", "KB", "MB", "GB"] as const;

@@ -1,4 +1,4 @@
-import { Command } from "commander";
+﻿import { Command } from "commander";
 import { register } from "./registry.js";
 import type { CommandDefinition } from "./types.js";
 
@@ -94,8 +94,4 @@ export async function doctorAction(
   }
 
   console.log("");
-}
-
-export function doctorCommand(cmd: Command): void {
-  def.setup(cmd);
 }

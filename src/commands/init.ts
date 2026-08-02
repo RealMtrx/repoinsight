@@ -1,4 +1,4 @@
-import { Command } from "commander";
+﻿import { Command } from "commander";
 import { register } from "./registry.js";
 import type { CommandDefinition } from "./types.js";
 import { theme, styles, icons } from "../tui/index.js";
@@ -61,7 +61,3 @@ const def: CommandDefinition = {
 };
 
 register(def);
-
-export function initCommand(cmd: Command): void {
-  def.setup(cmd);
-}

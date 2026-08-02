@@ -1,4 +1,4 @@
-import type { Command } from "commander";
+﻿import type { Command } from "commander";
 
 export interface CommandExample {
   usage: string;

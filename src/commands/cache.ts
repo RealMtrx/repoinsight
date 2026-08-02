@@ -1,4 +1,4 @@
-import { Command } from "commander";
+﻿import { Command } from "commander";
 import { existsSync, readFileSync, unlinkSync } from "node:fs";
 import path from "node:path";
 import { register } from "./registry.js";
@@ -44,13 +44,13 @@ const def: CommandDefinition = {
           if (cacheFile) {
             try {
               unlinkSync(cacheFile);
-              console.log(theme.success(`${icons.warn ?? "🗑"} Cache cleared (${cacheFile})`));
+              console.log(theme.success(`${icons.warn ?? "ًں—‘"} Cache cleared (${cacheFile})`));
             } catch {
               console.log(theme.error(`Failed to clear cache at ${cacheFile}`));
             }
             return;
           }
-          console.log(theme.info(`${icons.warn ?? "ℹ"} No cache file found to clear`));
+          console.log(theme.info(`${icons.warn ?? "â„¹"} No cache file found to clear`));
           return;
         }
 
@@ -85,7 +85,3 @@ const def: CommandDefinition = {
 };
 
 register(def);
-
-export function cacheCommand(cmd: Command): void {
-  def.setup(cmd);
-}

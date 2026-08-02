@@ -1,4 +1,4 @@
-import { Command } from "commander";
+﻿import { Command } from "commander";
 import { register } from "./registry.js";
 import type { CommandDefinition } from "./types.js";
 import { APP_NAME, APP_VERSION } from "../constants/index.js";
@@ -29,7 +29,3 @@ const def: CommandDefinition = {
 };
 
 register(def);
-
-export function versionCommand(cmd: Command): void {
-  def.setup(cmd);
-}
