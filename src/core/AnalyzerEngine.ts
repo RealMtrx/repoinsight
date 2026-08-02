@@ -24,6 +24,7 @@ import type {
   FolderInfo,
 } from "../types/index.js";
 import { Detector } from "../detection/index.js";
+import { detectTarget } from "../utils/detectTarget.js";
 import { countLines, getDirectoryTree } from "../utils/file.js";
 import {
   isGitRepository,
@@ -210,7 +211,7 @@ export class AnalyzerEngine {
     const todoComments = this.findTodoComments(fileContents);
     const hardcodedSecrets = this.findHardcodedSecrets(fileContents);
 
-    const detectorRoot = scope.type === "directory" ? rootPath : rootPath;
+    const detectorRoot = rootPath;
     const technologies = new Detector(detectorRoot).detect();
     const largeAssets = this.findLargeAssets(files);
     const binaryFiles = files.filter((f) => f.isBinary).map((f) => f.path);
@@ -1165,28 +1166,4 @@ export class AnalyzerEngine {
 
     return recommendations;
   }
-}
-
-function detectTarget(inputPath: string): AnalysisScope {
-  const resolved = path.resolve(inputPath);
-
-  if (!existsSync(resolved)) {
-    return { type: "repository", targetPath: resolved };
-  }
-
-  const stat = statSync(resolved);
-
-  if (stat.isFile()) {
-    return { type: "file", targetPath: resolved };
-  }
-
-  if (stat.isDirectory()) {
-    const gitDir = path.join(resolved, ".git");
-    if (existsSync(gitDir) && statSync(gitDir).isDirectory()) {
-      return { type: "repository", targetPath: resolved };
-    }
-    return { type: "directory", targetPath: resolved };
-  }
-
-  return { type: "repository", targetPath: resolved };
 }
