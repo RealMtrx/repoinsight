@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { SCORE_WEIGHTS_DEFAULT } from "../constants/index.js";
 import type { RepoInsightConfig, ScoreWeights } from "../types/index.js";
+import { readIgnorePatterns } from "./ignore.js";
 
 let config: RepoInsightConfig = {};
 
@@ -41,7 +42,11 @@ export function loadConfig(
 ): RepoInsightConfig {
   const baseDir = dir ?? process.cwd();
   const fileConfig = readConfigFile(baseDir) ?? {};
-  const excludePatterns = userConfig?.excludePatterns ?? fileConfig.excludePatterns;
+  const ignorePatterns = readIgnorePatterns(baseDir);
+  const fileExcludes = fileConfig.excludePatterns ?? [];
+  const excludePatterns = userConfig?.excludePatterns ?? [
+    ...new Set([...fileExcludes, ...ignorePatterns]),
+  ];
 
   config = {
     excludePatterns,

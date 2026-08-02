@@ -95,6 +95,24 @@ repoinsight works out of the box with zero configuration. Optional config is loa
 - `.repoinsightrc` in project root
 - `repoinsight` key in `package.json`
 
+### Per-project ignore patterns
+
+Create a `.repoinsightignore` file in your project root to exclude files and folders from analysis,
+using gitignore-style patterns. Lines starting with `#` are comments, and blank lines are skipped.
+
+```gitignore
+# exclude build artifacts and generated code
+dist/**
+coverage/**
+generated/**
+
+# exclude by extension anywhere in the tree
+*.min.js
+*.map
+```
+
+Patterns from `.repoinsightignore` are merged with `excludePatterns` from your config file.
+
 ### Example `repoinsight.json`
 
 ```json

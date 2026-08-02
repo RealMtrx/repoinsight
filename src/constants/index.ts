@@ -23,6 +23,7 @@ export const DEFAULT_EXCLUDE_PATTERNS = [
   "bun.lock",
   "*.lock",
   ".gitignore",
+  ".repoinsightignore",
 ];
 
 export const MAX_FILE_SIZE_DEFAULT = 10_485_760;

@@ -19,12 +19,12 @@ milestone and are subject to change based on community feedback and maintainer a
 - [x] Config system (repoinsight.json, .repoinsightrc)
 - [x] Plugin system architecture
 
-## v1.2 — Up next
+## v1.2 — In progress
 
 - [ ] **Configurable rule sets** — Custom severity thresholds and ignore patterns
 - [ ] **Offline vulnerability lookup** — Local database of known vulnerabilities
 - [ ] **GitHub Actions annotations** — PR comment annotations from analysis
-- [ ] **`.repoinsightignore` file** — Per-project exclusion patterns
+- [x] **`.repoinsightignore` file** — Per-project exclusion patterns
 - [ ] **Performance profiling** — Detect slow functions, large bundles, import bottlenecks
 - [ ] **Monorepo-aware analysis** — Analyze individual packages within monorepos
 

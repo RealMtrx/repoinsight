@@ -107,7 +107,7 @@ describe("config file loading", () => {
     const dir = mkdtempSync(join(tmpdir(), "config-test-"));
     tempDirs.push(dir);
     const config = loadConfig(undefined, dir);
-    expect(config.excludePatterns).toBeUndefined();
+    expect(config.excludePatterns).toEqual([]);
     expect(config.maxFileSize).toBeUndefined();
     expect(config.scoreWeights).toEqual(SCORE_WEIGHTS_DEFAULT);
   });
@@ -118,6 +118,62 @@ describe("config file loading", () => {
     writeFileSync(join(dir, "repoinsight.json"), "not valid json{{");
     const config = loadConfig(undefined, dir);
     expect(config.scoreWeights).toEqual(SCORE_WEIGHTS_DEFAULT);
-    expect(config.excludePatterns).toBeUndefined();
+    expect(config.excludePatterns).toEqual([]);
+  });
+});
+
+describe(".repoinsightignore", () => {
+  const tempDirs: string[] = [];
+
+  function makeIgnoreDir(ignoreContent: string, withConfig?: Record<string, unknown>) {
+    const dir = mkdtempSync(join(tmpdir(), "ignore-test-"));
+    tempDirs.push(dir);
+    writeFileSync(join(dir, ".repoinsightignore"), ignoreContent);
+    if (withConfig) {
+      writeFileSync(join(dir, "repoinsight.json"), JSON.stringify(withConfig));
+    }
+    return dir;
+  }
+
+  afterAll(() => {
+    for (const dir of tempDirs) {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("loads patterns from .repoinsightignore", () => {
+    const dir = makeIgnoreDir("vendor/**\n*.log\n");
+    const config = loadConfig(undefined, dir);
+    expect(config.excludePatterns).toContain("vendor/**");
+    expect(config.excludePatterns).toContain("*.log");
+  });
+
+  it("ignores comments and blank lines in .repoinsightignore", () => {
+    const dir = makeIgnoreDir("# comment\n\n  \nbuild/**\n");
+    const config = loadConfig(undefined, dir);
+    expect(config.excludePatterns).toContain("build/**");
+    expect(config.excludePatterns).not.toContain("# comment");
+    expect(config.excludePatterns?.some((p) => p.trim() === "")).toBe(false);
+  });
+
+  it("merges .repoinsightignore patterns with repoinsight.json excludePatterns", () => {
+    const dir = makeIgnoreDir("vendor/**", { excludePatterns: ["dist/**"] });
+    const config = loadConfig(undefined, dir);
+    expect(config.excludePatterns).toContain("dist/**");
+    expect(config.excludePatterns).toContain("vendor/**");
+  });
+
+  it("deduplicates patterns from config and ignore file", () => {
+    const dir = makeIgnoreDir("shared/**", { excludePatterns: ["shared/**"] });
+    const config = loadConfig(undefined, dir);
+    const matches = config.excludePatterns?.filter((p) => p === "shared/**");
+    expect(matches?.length).toBe(1);
+  });
+
+  it("returns no ignore patterns when the file is absent", () => {
+    const dir = mkdtempSync(join(tmpdir(), "ignore-test-"));
+    tempDirs.push(dir);
+    const config = loadConfig(undefined, dir);
+    expect(config.excludePatterns).toEqual([]);
   });
 });

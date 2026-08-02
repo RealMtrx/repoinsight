@@ -86,6 +86,9 @@ function detectConfigSource(dir: string): string {
       return label;
     }
   }
+  if (existsSync(join(dir, ".repoinsightignore"))) {
+    return ".repoinsightignore (ignore patterns only)";
+  }
   return "none (defaults)";
 }
 

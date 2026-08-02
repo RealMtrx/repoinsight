@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`.repoinsightignore` support** — Per-project exclusion patterns in gitignore style, merged with
+  `excludePatterns` from config files
 - **Config file loading** — `loadConfig()` now actually reads configuration from disk, honoring the
   documented sources: `repoinsight.json`, `.repoinsightrc`, and the `repoinsight` key in
   `package.json` (in that priority order)
@@ -17,9 +19,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   size limits now take effect
 - **Scanner maxFileSize** — `Scanner` respects `options.maxFileSize` instead of always using the
   default constant
+- **Directory-aware exclusion expansion** — `Scanner` expands `dir/**` patterns so the root
+  directory itself is excluded, not just its descendants
 - **Effective configuration display** — `config` command shows the resolved config source, active
   exclude patterns, max file size, and score weights instead of hardcoded defaults
-- **8 new tests** for config file loading (priority, fallbacks, invalid JSON, defaults)
+- **10 new tests** for config file loading, ignore-file merging, and exclusion expansion
 
 ### Fixed
 

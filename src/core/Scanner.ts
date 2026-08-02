@@ -23,9 +23,10 @@ export class Scanner {
 
   constructor(options: AnalysisOptions) {
     this.maxFileSize = options.maxFileSize ?? MAX_FILE_SIZE_DEFAULT;
-    this.excludeRegexes = [...DEFAULT_EXCLUDE_PATTERNS, ...options.excludePatterns].map((p) =>
-      Scanner.patternToRegex(p),
-    );
+    this.excludeRegexes = Scanner.expandPatterns([
+      ...DEFAULT_EXCLUDE_PATTERNS,
+      ...options.excludePatterns,
+    ]).map((p) => Scanner.patternToRegex(p));
   }
 
   async scan(rootPath: string): Promise<ScanResult> {
@@ -191,6 +192,17 @@ export class Scanner {
       .replace(/\*/g, "[^/]*")
       .replace(/@@DOUBLESTAR@@/g, ".*");
     return new RegExp(`^${regexStr}$`);
+  }
+
+  static expandPatterns(patterns: string[]): string[] {
+    const expanded: string[] = [];
+    for (const pattern of patterns) {
+      expanded.push(pattern);
+      if (pattern.endsWith("/**")) {
+        expanded.push(pattern.slice(0, -3));
+      }
+    }
+    return expanded;
   }
 
   static findProjectRoot(startPath: string): string {

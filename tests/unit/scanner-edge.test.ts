@@ -41,6 +41,21 @@ describe("Scanner edge cases", () => {
     expect(regex.test("debug.log.gz")).toBe(false);
   });
 
+  it("patternToRegex with /** matches descendants but not the root dir", () => {
+    const regex = Scanner.patternToRegex("vendor/**");
+    expect(regex.test("vendor/x")).toBe(true);
+    expect(regex.test("vendor/x/y.js")).toBe(true);
+    expect(regex.test("vendor")).toBe(false);
+  });
+
+  it("expandPatterns adds bare directory patterns for /** patterns", () => {
+    const expanded = Scanner.expandPatterns(["vendor/**", "*.log"]);
+    expect(expanded).toContain("vendor/**");
+    expect(expanded).toContain("vendor");
+    expect(expanded).not.toContain("*.log/");
+    expect(expanded.filter((p) => p === "*.log").length).toBe(1);
+  });
+
   it("findProjectRoot returns current directory", () => {
     const root = Scanner.findProjectRoot(".");
     expect(typeof root).toBe("string");
