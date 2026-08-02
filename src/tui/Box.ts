@@ -30,7 +30,7 @@ export function createBox(lines: (string | string[])[], opts: BoxOptions = {}): 
 
   if (opts.title) {
     const titleText = ` ${titleColor(opts.title)} `;
-    const leftPad = width - visibleLength(titleText) - 2;
+    const leftPad = Math.max(0, width - visibleLength(titleText) - 2);
     result.push(topLeft + hLine + titleText + hLine.repeat(leftPad) + topRight);
   } else {
     result.push(topLeft + repeat(hLine, width) + topRight);

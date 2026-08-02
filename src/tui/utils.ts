@@ -16,13 +16,25 @@ export function wrapText(text: string, maxWidth: number): string[] {
   const words = text.split(" ");
   let current = "";
   for (const word of words) {
-    if ((current + " " + word).trim().length > maxWidth) {
+    if (current && (current + " " + word).trim().length > maxWidth) {
+      lines.push(current.trim());
+      current = "";
+    }
+    if (word.length > maxWidth) {
       if (current) {
         lines.push(current.trim());
+        current = "";
       }
-      current = word;
-    } else {
+      let remaining = word;
+      while (remaining.length > maxWidth) {
+        lines.push(remaining.slice(0, maxWidth));
+        remaining = remaining.slice(maxWidth);
+      }
+      current = remaining;
+    } else if (current) {
       current += " " + word;
+    } else {
+      current = word;
     }
   }
   if (current.trim()) {
@@ -46,7 +58,11 @@ export function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) {
     return text;
   }
-  return text.slice(0, maxLength - 1) + icons.ellipsis;
+  if (maxLength <= 0) {
+    return "";
+  }
+  const keep = Math.max(0, maxLength - icons.ellipsis.length);
+  return text.slice(0, keep) + icons.ellipsis;
 }
 
 export function stripAnsi(str: string): string {

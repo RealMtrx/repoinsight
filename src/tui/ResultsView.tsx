@@ -109,6 +109,12 @@ function SummarySection({ report }: { report: AnalysisReport }) {
           {report.gitStats ? "✓ active" : "—"}
         </Text>
       </Text>
+      {report.licenseName || report.licenseSpdx ? (
+        <Text>
+          <Text color="#8D99AE">License:  </Text>
+          <Text color="#52B788">{report.licenseSpdx ?? report.licenseName}</Text>
+        </Text>
+      ) : null}
       <Text>
         <Text color="#8D99AE">Languages:</Text>
         <Text color="#E76F51"> {report.languages.length}</Text>
