@@ -19,8 +19,10 @@ function entryName(entry: Dirent): string {
 
 export class Scanner {
   private readonly excludeRegexes: RegExp[];
+  private readonly maxFileSize: number;
 
   constructor(options: AnalysisOptions) {
+    this.maxFileSize = options.maxFileSize ?? MAX_FILE_SIZE_DEFAULT;
     this.excludeRegexes = [...DEFAULT_EXCLUDE_PATTERNS, ...options.excludePatterns].map((p) =>
       Scanner.patternToRegex(p),
     );
@@ -129,7 +131,7 @@ export class Scanner {
           folderMap.set(parentDir, { fileCount: 1, totalSize: stat.size });
         }
 
-        if (stat.size <= MAX_FILE_SIZE_DEFAULT) {
+        if (stat.size <= this.maxFileSize) {
           files.push({
             path: relativePath,
             size: stat.size,

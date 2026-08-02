@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Config file loading** — `loadConfig()` now actually reads configuration from disk, honoring the
+  documented sources: `repoinsight.json`, `.repoinsightrc`, and the `repoinsight` key in
+  `package.json` (in that priority order)
+- **Config-aware analysis** — `runAnalysis()` resolves config from the analyzed directory and merges
+  `excludePatterns` and `maxFileSize` into analysis options, so user-defined ignore patterns and
+  size limits now take effect
+- **Scanner maxFileSize** — `Scanner` respects `options.maxFileSize` instead of always using the
+  default constant
+- **Effective configuration display** — `config` command shows the resolved config source, active
+  exclude patterns, max file size, and score weights instead of hardcoded defaults
+- **8 new tests** for config file loading (priority, fallbacks, invalid JSON, defaults)
+
+### Fixed
+
+- **Version mismatch** — `APP_VERSION` in `constants/index.ts` was stale (`1.3.0`) while the package
+  was at `1.4.0`; version output is now consistent
+
 ## [1.4.0] — 2026-07-28
 
 ### Added

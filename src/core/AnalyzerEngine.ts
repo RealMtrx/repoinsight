@@ -1,7 +1,6 @@
 import { existsSync, statSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { loadConfig } from "../config/index.js";
 import { Scanner } from "./Scanner.js";
 import { AnalysisCache } from "./Cache.js";
 import type {
@@ -48,7 +47,6 @@ export class AnalyzerEngine {
   private readonly cache: AnalysisCache | null;
 
   constructor(options: AnalysisOptions) {
-    loadConfig({ excludePatterns: options.excludePatterns });
     this.options = options;
     this.scanner = new Scanner(options);
     this.cache = options.useCache ? new AnalysisCache(process.cwd()) : null;

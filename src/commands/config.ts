@@ -1,4 +1,6 @@
 import { Command } from "commander";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { register } from "./registry.js";
 import type { CommandDefinition } from "./types.js";
 import { theme, styles, icons, createBox } from "../tui/index.js";
@@ -32,25 +34,37 @@ const def: CommandDefinition = {
           return;
         }
 
-        console.log(
-          createBox(
-            [
-              styles.subheading("Default Configuration"),
-              "",
-              `${styles.label("Documentation:")}  ${styles.value("15%")}`,
-              `${styles.label("Testing:")}        ${styles.value("15%")}`,
-              `${styles.label("Structure:")}       ${styles.value("12%")}`,
-              `${styles.label("Dependencies:")}    ${styles.value("12%")}`,
-              `${styles.label("Security:")}        ${styles.value("15%")}`,
-              `${styles.label("Maintainability:")} ${styles.value("12%")}`,
-              `${styles.label("Performance:")}     ${styles.value("9%")}`,
-              `${styles.label("Code Quality:")}    ${styles.value("10%")}`,
-              "",
-              styles.dim("Run repoinsight init to create a config file"),
-            ],
-            { title: " Configuration", width: 48 },
+        const { loadConfig } = await import("../config/index.js");
+        const cfg = loadConfig();
+        const weights = cfg.scoreWeights;
+
+        const lines = [
+          styles.subheading("Effective Configuration"),
+          "",
+          `${styles.label("Config file:")}    ${styles.value(detectConfigSource(process.cwd()))}`,
+          `${styles.label("Exclude patterns:")} ${
+            cfg.excludePatterns && cfg.excludePatterns.length > 0
+              ? styles.value(cfg.excludePatterns.join(", "))
+              : styles.dim("none (using defaults)")
+          }`,
+          `${styles.label("Max file size:")}   ${
+            cfg.maxFileSize
+              ? styles.value(formatBytes(cfg.maxFileSize))
+              : styles.dim(`${formatBytes(10_485_760)} (default)`)
+          }`,
+          "",
+          styles.subheading("Score Weights"),
+          ...Object.entries(weights ?? {}).map(
+            ([key, value]) =>
+              `${styles.label(`${key}:`)}${" ".repeat(Math.max(1, 16 - key.length))} ${styles.value(
+                `${value}%`,
+              )}`,
           ),
-        );
+          "",
+          styles.dim("Run repoinsight init to create or edit a config file"),
+        ];
+
+        console.log(createBox(lines, { title: " Configuration", width: 56 }));
       });
   },
 };
@@ -59,4 +73,28 @@ register(def);
 
 export function configCommand(cmd: Command): void {
   def.setup(cmd);
+}
+
+function detectConfigSource(dir: string): string {
+  const candidates: [string, string][] = [
+    [join(dir, "repoinsight.json"), "repoinsight.json"],
+    [join(dir, ".repoinsightrc"), ".repoinsightrc"],
+    [join(dir, "package.json"), "package.json (repoinsight key)"],
+  ];
+  for (const [filePath, label] of candidates) {
+    if (existsSync(filePath)) {
+      return label;
+    }
+  }
+  return "none (defaults)";
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
