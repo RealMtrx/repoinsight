@@ -20,8 +20,8 @@
 ## Features
 
 - **Interactive TUI** — keyboard-navigable terminal interface with scope-aware analysis
-- **14 Commands** — analyze, doctor, report, init, config, fix, stats, graph, deps, licenses,
-  security, cache, update, help
+- **16 Commands** — analyze, doctor, report, init, config, fix, stats, graph, deps, licenses,
+  security, cache, annotations, update, version, help
 - **Path-Aware Analysis** — auto-detects whether the target is a file, directory, or repository root
   and scopes the analysis accordingly CI/CD, linters, and more
 - **4 Report Formats** — terminal (ANSI), HTML (dark theme), Markdown, JSON
@@ -29,6 +29,8 @@
 - **Scoring** — 8-category health score with actionable recommendations
 - **Offline Vulnerability Scan** — local database of known package vulnerabilities checked against
   resolved dependency versions (`security` command, and included in every report/scoring)
+- **GitHub Actions Annotations** — `annotations` command emits `::error`/`::warning`/`::notice`
+  workflow commands so findings appear inline in PR checks
 - **Zero Config** — works out of the box, no configuration needed
 
 ## Install
@@ -72,22 +74,23 @@ repoinsight
 
 ## Commands
 
-| Command    | Aliases        | Description                          |
-| ---------- | -------------- | ------------------------------------ |
-| `analyze`  | `a`, `inspect` | Path-aware repository analysis       |
-| `doctor`   | `d`, `checkup` | Repository health checkup            |
-| `report`   | `r`            | Generate report from cached analysis |
-| `init`     | `i`            | Initialize a new analysis            |
-| `config`   | `c`            | View or edit configuration           |
-| `fix`      | `f`, `repair`  | Fix common repository issues         |
-| `stats`    | `s`            | Show repository statistics           |
-| `graph`    | `g`            | Generate dependency graph            |
-| `deps`     | `dep`          | Analyze dependencies                 |
-| `licenses` | `l`, `license` | Check dependency licenses            |
-| `security` | `sec`, `vuln`  | Security vulnerability scan          |
-| `cache`    | `c`            | Manage analysis cache                |
-| `update`   | `u`, `upgrade` | Check for updates                    |
-| `help`     | `h`, `?`       | Show help                            |
+| Command       | Aliases        | Description                          |
+| ------------- | -------------- | ------------------------------------ |
+| `analyze`     | `a`, `inspect` | Path-aware repository analysis       |
+| `doctor`      | `d`, `checkup` | Repository health checkup            |
+| `report`      | `r`            | Generate report from cached analysis |
+| `init`        | `i`            | Initialize a new analysis            |
+| `config`      | `c`            | View or edit configuration           |
+| `fix`         | `f`, `repair`  | Fix common repository issues         |
+| `stats`       | `s`            | Show repository statistics           |
+| `graph`       | `g`            | Generate dependency graph            |
+| `deps`        | `dep`          | Analyze dependencies                 |
+| `licenses`    | `l`, `license` | Check dependency licenses            |
+| `security`    | `sec`, `vuln`  | Security vulnerability scan          |
+| `cache`       | `c`            | Manage analysis cache                |
+| `annotations` | `ann`, `gha`   | Emit GitHub Actions annotations      |
+| `update`      | `u`, `upgrade` | Check for updates                    |
+| `help`        | `h`, `?`       | Show help                            |
 
 ## Configuration
 

@@ -20,6 +20,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Bundled semver utilities** — `src/utils/versions.ts` implements range parsing (`<`, `<=`, `>`,
   `>=`, `=`, `^`, `~`, `x`-wildcards, `||`, hyphen, combined constraints) with no external
   dependency, supporting both exact version checks and range-overlap detection
+- **GitHub Actions annotations** — new `annotations` command emits workflow command lines (`::error`
+  / `::warning` / `::notice`) from analysis findings (hardcoded secrets, known vulnerabilities,
+  missing critical dependencies, TODO comments, circular imports) so issues appear inline in the
+  GitHub Actions checks UI, with relative file paths and escaped properties/messages, a per-level
+  output cap, and severity filtering
 - **Configurable rule sets** — Custom severity thresholds (`scoreThresholds` for
   excellent/good/fair/ poor) in config files, applied consistently via `getScoreStatus()`
 - **`.repoinsightignore` support** — Per-project exclusion patterns in gitignore style, merged with

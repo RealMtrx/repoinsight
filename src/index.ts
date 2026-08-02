@@ -14,6 +14,7 @@ import "./commands/deps.js";
 import "./commands/licenses.js";
 import "./commands/security.js";
 import "./commands/cache.js";
+import "./commands/annotations.js";
 import "./commands/update.js";
 import "./commands/version.js";
 import "./commands/help.js";
