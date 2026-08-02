@@ -25,7 +25,7 @@ import type {
 } from "../types/index.js";
 import { Detector } from "../detection/index.js";
 import { detectTarget } from "../utils/detectTarget.js";
-import { countLines, getDirectoryTree } from "../utils/file.js";
+import { countLines } from "../utils/file.js";
 import {
   isGitRepository,
   getCommitCount,
@@ -54,6 +54,7 @@ export class AnalyzerEngine {
   private readonly options: AnalysisOptions;
   private readonly scanner: Scanner;
   private cache: AnalysisCache | null = null;
+  private readonly importResolutionCache = new Map<string, string | null>();
 
   constructor(options: AnalysisOptions) {
     this.options = options;
@@ -274,8 +275,6 @@ export class AnalyzerEngine {
       score: 0,
     };
 
-    const folderStructure = await getDirectoryTree(rootPath, "", this.options.excludePatterns);
-
     const scopeTarget = scope.targetPath ?? rootPath;
 
     const intermediate: AnalysisReport = {
@@ -285,7 +284,7 @@ export class AnalyzerEngine {
       analyzedAt: new Date().toISOString(),
       duration: Date.now() - startTime,
       summary,
-      folderStructure,
+      folderStructure: "",
       languages,
       biggestFolders,
       biggestFiles,
@@ -508,6 +507,12 @@ export class AnalyzerEngine {
     filePath: string,
     importSpecifier: string,
   ): string | null {
+    const cacheKey = `${filePath}|${importSpecifier}`;
+    const cached = this.importResolutionCache.get(cacheKey);
+    if (cached !== undefined) {
+      return cached;
+    }
+
     const dir = path.dirname(path.join(rootPath, filePath));
     const resolved = path.resolve(dir, importSpecifier);
     const extensions = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json", ""];
@@ -515,13 +520,17 @@ export class AnalyzerEngine {
       const fullPath = resolved + ext;
       const relativePath = path.relative(rootPath, fullPath).replace(/\\/g, "/");
       if (existsSync(fullPath)) {
+        this.importResolutionCache.set(cacheKey, relativePath);
         return relativePath;
       }
       const indexFile = path.join(resolved, `index${ext}`);
       if (existsSync(indexFile)) {
-        return path.relative(rootPath, indexFile).replace(/\\/g, "/");
+        const rel = path.relative(rootPath, indexFile).replace(/\\/g, "/");
+        this.importResolutionCache.set(cacheKey, rel);
+        return rel;
       }
     }
+    this.importResolutionCache.set(cacheKey, null);
     return null;
   }
 
@@ -589,59 +598,59 @@ export class AnalyzerEngine {
         ...(pkg.devDependencies as Record<string, string> | undefined),
       };
 
-      const allSource = Array.from(fileContents.values()).join("\n");
-
-      for (const [dep] of Object.entries(dependencies)) {
-        const usagePattern = new RegExp(
-          `(?:from\\s+["']${this.escapeRegex(dep)}["']|require\\s*\\(\\s*["']${this.escapeRegex(dep)}["']\\s*\\))`,
-          "g",
-        );
-
-        if (!usagePattern.test(allSource)) {
-          const isReferenced = files.some((f) => {
-            const fc = fileContents.get(f.path);
-            return fc ? fc.includes(dep) : false;
-          });
-
-          if (!isReferenced) {
-            const isDev = pkg.devDependencies
-              ? (pkg.devDependencies as Record<string, string>)[dep] !== undefined
-              : false;
-            issues.push({
-              name: dep,
-              type: "unused",
-              severity: "warning",
-              details: `Dependency "${dep}" is listed in ${
-                isDev ? "devDependencies" : "dependencies"
-              } but never imported`,
-            });
-          }
-        }
-      }
-
-      const knownPackages = new Set(Object.keys(dependencies));
+      const usedPackages = new Set<string>();
+      const importRegex = /(?:from\s+["']([^"']+)["']|require\s*\(\s*["']([^"']+)["']\s*\))/g;
       for (const [, content] of fileContents) {
-        const importRegex = /(?:from\s+["']([^"']+)["']|require\s*\(\s*["']([^"']+)["']\s*\))/g;
+        importRegex.lastIndex = 0;
         let m: RegExpExecArray | null;
         while ((m = importRegex.exec(content)) !== null) {
           const specifier = m[1] ?? m[2];
-          if (!specifier) {
+          if (!specifier || specifier.startsWith(".") || specifier.startsWith("/")) {
             continue;
           }
-          if (specifier.startsWith(".") || specifier.startsWith("/")) {
-            continue;
-          }
-          const pkgName = specifier.startsWith("@")
-            ? specifier.split("/").slice(0, 2).join("/")
-            : (specifier.split("/")[0] ?? specifier);
-          if (!knownPackages.has(pkgName)) {
-            issues.push({
-              name: pkgName,
-              type: "missing",
-              severity: "critical",
-              details: `"${pkgName}" is imported but not listed in package.json`,
-            });
-          }
+          usedPackages.add(specifier);
+        }
+      }
+
+      for (const [dep] of Object.entries(dependencies)) {
+        if (usedPackages.has(dep)) {
+          continue;
+        }
+        const isReferenced = files.some((f) => {
+          const fc = fileContents.get(f.path);
+          return fc ? fc.includes(dep) : false;
+        });
+        if (isReferenced) {
+          continue;
+        }
+        const isDev = pkg.devDependencies
+          ? (pkg.devDependencies as Record<string, string>)[dep] !== undefined
+          : false;
+        issues.push({
+          name: dep,
+          type: "unused",
+          severity: "warning",
+          details: `Dependency "${dep}" is listed in ${
+            isDev ? "devDependencies" : "dependencies"
+          } but never imported`,
+        });
+      }
+
+      const knownPackages = new Set(Object.keys(dependencies));
+      const seenMissing = new Set<string>();
+      for (const specifier of usedPackages) {
+        const parts = specifier.split("/");
+        const pkgName = specifier.startsWith("@")
+          ? parts.slice(0, 2).join("/")
+          : (parts[0] ?? specifier);
+        if (!knownPackages.has(pkgName) && !seenMissing.has(pkgName)) {
+          seenMissing.add(pkgName);
+          issues.push({
+            name: pkgName,
+            type: "missing",
+            severity: "critical",
+            details: `"${pkgName}" is imported but not listed in package.json`,
+          });
         }
       }
     } catch {
@@ -657,10 +666,6 @@ export class AnalyzerEngine {
     }
 
     return Array.from(unique.values()).slice(0, 50);
-  }
-
-  private escapeRegex(str: string): string {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   private analyzeGit(rootPath: string): GitStats | null {
