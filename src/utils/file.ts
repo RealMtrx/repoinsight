@@ -2,6 +2,37 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { BINARY_EXTENSIONS } from "../constants/index.js";
 
+export async function mapLimit<T, R>(
+  items: readonly T[],
+  limit: number,
+  mapper: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  const results: (R | undefined)[] = Array.from({ length: items.length });
+  let nextIndex = 0;
+
+  const worker = async (): Promise<void> => {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex++;
+      const item = items[index] as T;
+      try {
+        results[index] = await mapper(item, index);
+      } catch (error) {
+        const reason = error instanceof Error ? error : new Error(String(error));
+        results[index] = await Promise.reject(reason);
+      }
+    }
+  };
+
+  const workers: Promise<void>[] = [];
+  for (let i = 0; i < Math.min(limit, items.length); i++) {
+    workers.push(worker());
+  }
+  await Promise.all(workers);
+
+  return results as R[];
+}
+
 export function isBinaryFile(filePath: string): boolean {
   const ext = path.extname(filePath).toLowerCase();
   return BINARY_EXTENSIONS.has(ext);

@@ -25,7 +25,7 @@ import type {
 } from "../types/index.js";
 import { Detector } from "../detection/index.js";
 import { detectTarget } from "../utils/detectTarget.js";
-import { countLines } from "../utils/file.js";
+import { countLines, mapLimit } from "../utils/file.js";
 import {
   isGitRepository,
   getCommitCount,
@@ -355,35 +355,32 @@ export class AnalyzerEngine {
   ): Promise<Map<string, string>> {
     const contents = new Map<string, string>();
 
-    const loadTasks = files
-      .filter((f) => !f.isBinary)
-      .map(async (file) => {
-        try {
-          const fullPath = path.join(rootPath, file.path);
-          const stat = statSync(fullPath);
+    const fileList = files.filter((f) => !f.isBinary);
+    const results = await mapLimit(fileList, 64, async (file) => {
+      try {
+        const fullPath = path.join(rootPath, file.path);
+        const stat = statSync(fullPath);
 
-          if (this.cache) {
-            const cached = this.cache.get(fullPath, stat.mtimeMs, stat.size, "content");
-            if (cached !== null && typeof cached === "string") {
-              file.lines = countLines(cached);
-              return { path: file.path, content: cached } as const;
-            }
+        if (this.cache) {
+          const cached = this.cache.get(fullPath, stat.mtimeMs, stat.size, "content");
+          if (cached !== null && typeof cached === "string") {
+            file.lines = countLines(cached);
+            return { path: file.path, content: cached } as const;
           }
-
-          const content = await readFile(fullPath, "utf-8");
-          file.lines = countLines(content);
-
-          if (this.cache) {
-            this.cache.set(fullPath, stat.mtimeMs, stat.size, "content", content);
-          }
-
-          return { path: file.path, content } as const;
-        } catch {
-          return null;
         }
-      });
 
-    const results = await Promise.all(loadTasks);
+        const content = await readFile(fullPath, "utf-8");
+        file.lines = countLines(content);
+
+        if (this.cache) {
+          this.cache.set(fullPath, stat.mtimeMs, stat.size, "content", content);
+        }
+
+        return { path: file.path, content } as const;
+      } catch {
+        return null;
+      }
+    });
     for (const result of results) {
       if (result) {
         contents.set(result.path, result.content);
