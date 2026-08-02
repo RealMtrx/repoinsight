@@ -44,6 +44,12 @@ const def: CommandDefinition = {
             performance: 9,
             codeQuality: 10,
           },
+          scoreThresholds: {
+            excellent: 90,
+            good: 75,
+            fair: 60,
+            poor: 40,
+          },
         };
 
         fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2) + "\n", "utf-8");

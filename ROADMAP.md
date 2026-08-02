@@ -21,7 +21,7 @@ milestone and are subject to change based on community feedback and maintainer a
 
 ## v1.2 — In progress
 
-- [ ] **Configurable rule sets** — Custom severity thresholds and ignore patterns
+- [x] **Configurable rule sets** — Custom severity thresholds and ignore patterns
 - [ ] **Offline vulnerability lookup** — Local database of known vulnerabilities
 - [ ] **GitHub Actions annotations** — PR comment annotations from analysis
 - [x] **`.repoinsightignore` file** — Per-project exclusion patterns

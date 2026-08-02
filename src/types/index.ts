@@ -9,6 +9,14 @@ export interface RepoInsightConfig {
   excludePatterns?: string[];
   maxFileSize?: number;
   scoreWeights?: ScoreWeights;
+  scoreThresholds?: ScoreThresholds;
+}
+
+export interface ScoreThresholds {
+  excellent: number;
+  good: number;
+  fair: number;
+  poor: number;
 }
 
 export interface ScoreWeights {

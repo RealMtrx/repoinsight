@@ -1,6 +1,6 @@
 import type { AnalysisReport, CategoryScore, ScoreStatus } from "../types/index.js";
-import { getScoreWeights } from "../config/index.js";
-import { SCORE_THRESHOLDS } from "../constants/index.js";
+import { getConfig, getScoreWeights } from "../config/index.js";
+import { SCORE_THRESHOLDS_DEFAULT } from "../constants/index.js";
 
 export function calculateScore(report: AnalysisReport): number {
   const weights = getScoreWeights();
@@ -31,17 +31,19 @@ export function calculateCategoryScores(report: AnalysisReport): CategoryScore[]
   ];
 }
 
-function getScoreStatus(percentage: number): ScoreStatus {
-  if (percentage >= SCORE_THRESHOLDS.excellent) {
+export function getScoreStatus(percentage: number): ScoreStatus {
+  const config = getConfig();
+  const thresholds = config.scoreThresholds ?? SCORE_THRESHOLDS_DEFAULT;
+  if (percentage >= thresholds.excellent) {
     return "excellent";
   }
-  if (percentage >= SCORE_THRESHOLDS.good) {
+  if (percentage >= thresholds.good) {
     return "good";
   }
-  if (percentage >= SCORE_THRESHOLDS.fair) {
+  if (percentage >= thresholds.fair) {
     return "fair";
   }
-  if (percentage >= SCORE_THRESHOLDS.poor) {
+  if (percentage >= thresholds.poor) {
     return "poor";
   }
   return "critical";

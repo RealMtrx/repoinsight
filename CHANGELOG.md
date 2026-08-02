@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Configurable rule sets** — Custom severity thresholds (`scoreThresholds` for
+  excellent/good/fair/ poor) in config files, applied consistently via `getScoreStatus()`
 - **`.repoinsightignore` support** — Per-project exclusion patterns in gitignore style, merged with
   `excludePatterns` from config files
 - **Config file loading** — `loadConfig()` now actually reads configuration from disk, honoring the
@@ -24,6 +26,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Effective configuration display** — `config` command shows the resolved config source, active
   exclude patterns, max file size, and score weights instead of hardcoded defaults
 - **10 new tests** for config file loading, ignore-file merging, and exclusion expansion
+
+### Changed
+
+- **Unified score classification** — `HtmlReporter` now uses `getScoreStatus()` from `scoring.ts`
+  instead of duplicated hardcoded thresholds (80/60/40/20), so custom thresholds apply everywhere
 
 ### Fixed
 

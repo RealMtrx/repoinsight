@@ -61,6 +61,14 @@ const def: CommandDefinition = {
               )}`,
           ),
           "",
+          styles.subheading("Score Thresholds"),
+          ...Object.entries(cfg.scoreThresholds ?? {}).map(
+            ([key, value]) =>
+              `${styles.label(`${key}:`)}${" ".repeat(Math.max(1, 16 - key.length))} ${styles.value(
+                `>= ${value}`,
+              )}`,
+          ),
+          "",
           styles.dim("Run repoinsight init to create or edit a config file"),
         ];
 

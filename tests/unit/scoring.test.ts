@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { calculateScore, calculateCategoryScores } from "../../src/utils/scoring.js";
+import { calculateScore, calculateCategoryScores, getScoreStatus } from "../../src/utils/scoring.js";
 import type { AnalysisReport } from "../../src/types/index.js";
 import { loadConfig } from "../../src/config/index.js";
 
@@ -200,5 +200,35 @@ describe("calculateScore", () => {
     });
     const score = calculateScore(worst);
     expect(score).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe("getScoreStatus", () => {
+  it("uses default thresholds by default", () => {
+    loadConfig();
+    expect(getScoreStatus(95)).toBe("excellent");
+    expect(getScoreStatus(80)).toBe("good");
+    expect(getScoreStatus(65)).toBe("fair");
+    expect(getScoreStatus(45)).toBe("poor");
+    expect(getScoreStatus(20)).toBe("critical");
+  });
+
+  it("respects custom thresholds", () => {
+    loadConfig({ scoreThresholds: { excellent: 95, good: 80, fair: 65, poor: 50 } });
+    expect(getScoreStatus(95)).toBe("excellent");
+    expect(getScoreStatus(94)).toBe("good");
+    expect(getScoreStatus(80)).toBe("good");
+    expect(getScoreStatus(65)).toBe("fair");
+    expect(getScoreStatus(64)).toBe("poor");
+    expect(getScoreStatus(50)).toBe("poor");
+    expect(getScoreStatus(49)).toBe("critical");
+  });
+
+  it("uses stricter custom thresholds for scoring categories", () => {
+    loadConfig({ scoreThresholds: { excellent: 100, good: 90, fair: 70, poor: 50 } });
+    const report = createMockReport();
+    const categories = calculateCategoryScores(report);
+    expect(categories.every((c) => c.status === "excellent" || c.status === "good")).toBe(true);
+    loadConfig();
   });
 });

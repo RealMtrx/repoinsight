@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { SCORE_WEIGHTS_DEFAULT } from "../constants/index.js";
-import type { RepoInsightConfig, ScoreWeights } from "../types/index.js";
+import { SCORE_WEIGHTS_DEFAULT, SCORE_THRESHOLDS_DEFAULT } from "../constants/index.js";
+import type { RepoInsightConfig, ScoreWeights, ScoreThresholds } from "../types/index.js";
 import { readIgnorePatterns } from "./ignore.js";
 
 let config: RepoInsightConfig = {};
@@ -56,6 +56,11 @@ export function loadConfig(
       ...fileConfig.scoreWeights,
       ...userConfig?.scoreWeights,
     },
+    scoreThresholds: {
+      ...SCORE_THRESHOLDS_DEFAULT,
+      ...fileConfig.scoreThresholds,
+      ...userConfig?.scoreThresholds,
+    },
   };
   return config;
 }
@@ -66,4 +71,8 @@ export function getConfig(): RepoInsightConfig {
 
 export function getScoreWeights(): ScoreWeights {
   return config.scoreWeights ?? SCORE_WEIGHTS_DEFAULT;
+}
+
+export function getScoreThresholds(): ScoreThresholds {
+  return config.scoreThresholds ?? SCORE_THRESHOLDS_DEFAULT;
 }

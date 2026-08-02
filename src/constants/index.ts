@@ -182,7 +182,7 @@ export const SCORE_WEIGHTS_DEFAULT = {
   codeQuality: 10,
 };
 
-export const SCORE_THRESHOLDS = {
+export const SCORE_THRESHOLDS_DEFAULT = {
   excellent: 90,
   good: 75,
   fair: 60,

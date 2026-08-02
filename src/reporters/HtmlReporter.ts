@@ -1,6 +1,7 @@
 import type { AnalysisReport, MultiAnalysisSummary } from "../types/index.js";
 import { formatFileSize } from "../utils/file.js";
 import { scopeIcon, scopeLabel } from "../utils/detectTarget.js";
+import { getScoreStatus } from "../utils/scoring.js";
 
 const C = {
   bg: "#1A1A2E",
@@ -270,15 +271,7 @@ export class HtmlReporter {
   }
 
   private scoreClass(s: number): string {
-    return s >= 80
-      ? "excellent"
-      : s >= 60
-        ? "good"
-        : s >= 40
-          ? "fair"
-          : s >= 20
-            ? "poor"
-            : "critical";
+    return getScoreStatus(s);
   }
 
   private statColor(s: string): string {

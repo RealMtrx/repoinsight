@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import { mkdirSync, writeFileSync, mkdtempSync, rmSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
-import { loadConfig, getConfig, getScoreWeights } from "../../src/config/index.js";
-import { SCORE_WEIGHTS_DEFAULT } from "../../src/constants/index.js";
+import { loadConfig, getConfig, getScoreWeights, getScoreThresholds } from "../../src/config/index.js";
+import { SCORE_WEIGHTS_DEFAULT, SCORE_THRESHOLDS_DEFAULT } from "../../src/constants/index.js";
 
 describe("config", () => {
   beforeEach(() => {
@@ -39,6 +39,19 @@ describe("config", () => {
     const weights = getScoreWeights();
     expect(weights.documentation).toBe(30);
     expect(weights.testing).toBe(SCORE_WEIGHTS_DEFAULT.testing);
+  });
+
+  it("getScoreThresholds returns defaults when no thresholds set", () => {
+    loadConfig();
+    const thresholds = getScoreThresholds();
+    expect(thresholds).toEqual(SCORE_THRESHOLDS_DEFAULT);
+  });
+
+  it("getScoreThresholds returns custom thresholds", () => {
+    loadConfig({ scoreThresholds: { excellent: 95, good: 80, fair: 65, poor: 50 } });
+    const thresholds = getScoreThresholds();
+    expect(thresholds.excellent).toBe(95);
+    expect(thresholds.poor).toBe(50);
   });
 });
 
