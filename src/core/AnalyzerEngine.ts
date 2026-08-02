@@ -363,7 +363,7 @@ export class AnalyzerEngine {
           if (this.cache) {
             const cached = this.cache.get(fullPath, stat.mtimeMs, stat.size, "content");
             if (cached !== null && typeof cached === "string") {
-              file.lines = cached.split("\n").length;
+              file.lines = countLines(cached);
               return { path: file.path, content: cached } as const;
             }
           }
