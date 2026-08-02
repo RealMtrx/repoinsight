@@ -25,7 +25,8 @@
 - **Path-Aware Analysis** — auto-detects whether the target is a file, directory, or repository root
   and scopes the analysis accordingly CI/CD, linters, and more
 - **4 Report Formats** — terminal (ANSI), HTML (dark theme), Markdown, JSON
-- **Performance** — parallel file scanning, smart caching, incremental analysis
+- **Performance** — parallel file scanning, smart caching, incremental analysis, and performance
+  profiling (large files, high cyclomatic complexity, and import bottlenecks)
 - **Scoring** — 8-category health score with actionable recommendations
 - **Offline Vulnerability Scan** — local database of known package vulnerabilities checked against
   resolved dependency versions (`security` command, and included in every report/scoring)

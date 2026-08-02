@@ -68,6 +68,7 @@ function createMockReport(overrides?: Partial<AnalysisReport>): AnalysisReport {
     envFiles: [],
     duplicateCode: [],
     complexity: [],
+    performanceIssues: [],
     missingReadme: false,
     missingLicense: false,
     missingGitignore: false,

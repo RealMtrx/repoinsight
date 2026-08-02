@@ -40,6 +40,7 @@ function createMockReport(overrides?: Partial<AnalysisReport>): AnalysisReport {
     envFiles: [],
     duplicateCode: [],
     complexity: [],
+    performanceIssues: [],
     missingReadme: false,
     missingLicense: false,
     missingGitignore: false,
@@ -134,6 +135,35 @@ describe("calculateCategoryScores", () => {
     const cleanSec = cleanScores.find((s) => s.name === "security")!.percentage;
     const vulnSec = vulnScores.find((s) => s.name === "security")!.percentage;
     expect(vulnSec).toBeLessThan(cleanSec);
+  });
+
+  it("calculates performance score lower with performance issues", () => {
+    const clean = createMockReport();
+    const slow = createMockReport({
+      performanceIssues: [
+        {
+          file: "src/big.ts",
+          type: "large-file",
+          severity: "critical",
+          metric: "lines of code",
+          value: 1200,
+          limit: 1000,
+        },
+        {
+          file: "src/app.ts",
+          type: "high-complexity",
+          severity: "warning",
+          metric: "cyclomatic complexity",
+          value: 12,
+          limit: 10,
+        },
+      ],
+    });
+    const cleanScores = calculateCategoryScores(clean);
+    const slowScores = calculateCategoryScores(slow);
+    const cleanPerf = cleanScores.find((s) => s.name === "performance")!.percentage;
+    const slowPerf = slowScores.find((s) => s.name === "performance")!.percentage;
+    expect(slowPerf).toBeLessThan(cleanPerf);
   });
 
   it("calculates structure score lower with empty folders", () => {

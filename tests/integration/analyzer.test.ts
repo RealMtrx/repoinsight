@@ -91,6 +91,18 @@ describe("AnalyzerEngine Integration", () => {
     const report = await engine.analyze(projectRoot);
     expect(Array.isArray(report.recommendations)).toBe(true);
   });
+
+  it("reports performance issues", async () => {
+    const engine = new AnalyzerEngine(defaultOptions.toObject());
+    const report = await engine.analyze(projectRoot);
+    expect(Array.isArray(report.performanceIssues)).toBe(true);
+    for (const issue of report.performanceIssues) {
+      expect(issue).toHaveProperty("file");
+      expect(["large-file", "high-complexity", "import-bottleneck"]).toContain(issue.type);
+      expect(["critical", "warning"]).toContain(issue.severity);
+      expect(typeof issue.value).toBe("number");
+    }
+  });
 });
 
 describe("Scanner Integration", () => {

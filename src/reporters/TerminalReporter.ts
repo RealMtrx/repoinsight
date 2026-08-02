@@ -448,6 +448,41 @@ export class TerminalReporter {
       );
     }
 
+    if (report.performanceIssues?.length) {
+      const table = new Table({
+        head: [
+          severity.medium("File"),
+          severity.medium("Issue"),
+          severity.medium("Value"),
+          severity.medium("Severity"),
+        ],
+        style: { head: [], border: ["yellow"] },
+        chars: {
+          top: icons.horizontal,
+          "top-mid": icons.teeDown,
+          "top-left": icons.topLeft,
+          "top-right": icons.topRight,
+          bottom: icons.horizontal,
+          "bottom-mid": icons.teeUp,
+          "bottom-left": icons.bottomLeft,
+          "bottom-right": icons.bottomRight,
+          left: icons.vertical,
+          "left-mid": icons.teeRight,
+          mid: icons.horizontal,
+          "mid-mid": icons.crossLine,
+          right: icons.vertical,
+          "right-mid": icons.teeLeft,
+          middle: " ",
+        },
+      });
+      for (const p of report.performanceIssues.slice(0, 15)) {
+        table.push([p.file, p.type, `${p.value} (limit ${p.limit})`, p.severity]);
+      }
+      console.log(
+        `\n${severity.medium(` ${icons.warn} Performance Findings`)}\n${table.toString()}`,
+      );
+    }
+
     if (report.circularImports?.length) {
       const table = new Table({
         head: [severity.medium("File"), severity.medium("Chain")],

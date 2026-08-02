@@ -179,6 +179,9 @@ function calculatePerformanceScore(report: AnalysisReport): CategoryScore {
   if (report.binaryFiles.length > 10) {
     score -= 10;
   }
+  for (const issue of report.performanceIssues ?? []) {
+    score -= issue.severity === "critical" ? 8 : 4;
+  }
   score = capScore(score);
   return {
     name: "performance",

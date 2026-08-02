@@ -70,6 +70,7 @@ function createMockReport(overrides?: Partial<AnalysisReport>): AnalysisReport {
     envFiles: [],
     duplicateCode: [],
     complexity: [],
+    performanceIssues: [],
     missingReadme: false,
     missingLicense: false,
     missingGitignore: false,
@@ -435,6 +436,23 @@ describe("MarkdownReporter", () => {
     const result = reporter.render(report);
     expect(result).toContain("Vulnerabilities");
     expect(result).toContain("CVE-2021-23337");
+  });
+
+  it("contains performance findings when present", () => {
+    const report = createMockReport({
+      performanceIssues: [
+        {
+          file: "src/big.ts",
+          type: "large-file",
+          severity: "warning",
+          metric: "lines of code",
+          value: 600,
+          limit: 500,
+        },
+      ],
+    });
+    const result = reporter.render(report);
+    expect(result).toContain("Performance");
   });
 
   it("contains TODO comments when present", () => {

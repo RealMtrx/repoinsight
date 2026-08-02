@@ -19,6 +19,7 @@ import type {
   LargeAsset,
   DuplicateCodeBlock,
   ComplexityMetrics,
+  PerformanceIssue,
   FileInfo,
   FolderInfo,
 } from "../types/index.js";
@@ -35,7 +36,12 @@ import {
 } from "../utils/git.js";
 import { calculateScore, calculateCategoryScores } from "../utils/scoring.js";
 import { scanForVulnerabilities } from "./vulnerabilities.js";
-import { LANGUAGE_EXTENSIONS, ENV_FILE_NAMES, LARGE_ASSET_EXTENSIONS } from "../constants/index.js";
+import {
+  LANGUAGE_EXTENSIONS,
+  ENV_FILE_NAMES,
+  LARGE_ASSET_EXTENSIONS,
+  PERFORMANCE_LIMITS,
+} from "../constants/index.js";
 
 interface AnalysisContext {
   rootPath: string;
@@ -134,6 +140,7 @@ export class AnalyzerEngine {
       envFiles: [],
       duplicateCode: [],
       complexity,
+      performanceIssues: [],
       missingReadme: false,
       missingLicense: false,
       missingGitignore: false,
@@ -167,6 +174,7 @@ export class AnalyzerEngine {
         largeAssets: [],
         duplicateCode: [],
         complexity,
+        performanceIssues: [],
       }),
     };
 
@@ -208,6 +216,7 @@ export class AnalyzerEngine {
     const envFiles = this.findEnvFiles(files);
     const duplicateCode = this.findDuplicateCode(fileContents);
     const complexity = this.analyzeComplexity(files, fileContents);
+    const performanceIssues = this.analyzePerformanceIssues(ctx, complexity);
     const projectSize = files.reduce((sum, f) => sum + f.size, 0);
 
     const missingReadme = !files.some((f) => /^readme\./i.test(path.basename(f.path)));
@@ -243,10 +252,12 @@ export class AnalyzerEngine {
         circularImports.length +
         dependencyIssues.filter((d) => d.severity === "critical").length +
         vulnerabilities.filter((v) => v.severity === "critical").length +
+        performanceIssues.filter((p) => p.severity === "critical").length +
         hardcodedSecrets.length,
       warnings:
         dependencyIssues.filter((d) => d.severity === "warning").length +
         vulnerabilities.filter((v) => v.severity === "warning").length +
+        performanceIssues.filter((p) => p.severity === "warning").length +
         todoComments.length +
         duplicateFileNames.length +
         emptyFolders.length +
@@ -285,6 +296,7 @@ export class AnalyzerEngine {
       envFiles,
       duplicateCode,
       complexity,
+      performanceIssues,
       missingReadme,
       missingLicense,
       missingGitignore,
@@ -318,6 +330,7 @@ export class AnalyzerEngine {
         largeAssets,
         duplicateCode,
         complexity,
+        performanceIssues,
       }),
     };
 
@@ -857,6 +870,126 @@ export class AnalyzerEngine {
     return metrics.sort((a, b) => b.cyclomaticComplexity - a.cyclomaticComplexity);
   }
 
+  private analyzePerformanceIssues(
+    ctx: AnalysisContext,
+    complexity: ComplexityMetrics[],
+  ): PerformanceIssue[] {
+    const issues: PerformanceIssue[] = [];
+    const { rootPath, files, fileContents } = ctx;
+
+    const sourceExts = new Set([".ts", ".tsx", ".js", ".jsx", ".py", ".java", ".cs", ".go", ".rs"]);
+
+    for (const c of complexity) {
+      if (c.cyclomaticComplexity >= PERFORMANCE_LIMITS.CRITICAL_COMPLEXITY) {
+        issues.push({
+          file: c.file,
+          type: "high-complexity",
+          severity: "critical",
+          metric: "cyclomatic complexity",
+          value: c.cyclomaticComplexity,
+          limit: PERFORMANCE_LIMITS.CRITICAL_COMPLEXITY,
+        });
+      } else if (c.cyclomaticComplexity >= PERFORMANCE_LIMITS.WARN_COMPLEXITY) {
+        issues.push({
+          file: c.file,
+          type: "high-complexity",
+          severity: "warning",
+          metric: "cyclomatic complexity",
+          value: c.cyclomaticComplexity,
+          limit: PERFORMANCE_LIMITS.WARN_COMPLEXITY,
+        });
+      }
+    }
+
+    for (const file of files) {
+      const ext = path.extname(file.path);
+      if (!sourceExts.has(ext)) {
+        continue;
+      }
+      const content = fileContents.get(file.path);
+      if (!content) {
+        continue;
+      }
+      const codeLines = content.split("\n").filter((l) => l.trim().length > 0).length;
+      if (codeLines >= PERFORMANCE_LIMITS.CRITICAL_FILE_LINES) {
+        issues.push({
+          file: file.path,
+          type: "large-file",
+          severity: "critical",
+          metric: "lines of code",
+          value: codeLines,
+          limit: PERFORMANCE_LIMITS.CRITICAL_FILE_LINES,
+        });
+      } else if (codeLines >= PERFORMANCE_LIMITS.WARN_FILE_LINES) {
+        issues.push({
+          file: file.path,
+          type: "large-file",
+          severity: "warning",
+          metric: "lines of code",
+          value: codeLines,
+          limit: PERFORMANCE_LIMITS.WARN_FILE_LINES,
+        });
+      }
+    }
+
+    const importCounts = this.countImportsPerFile(rootPath, files, fileContents);
+    for (const [filePath, count] of importCounts) {
+      if (count >= PERFORMANCE_LIMITS.CRITICAL_IMPORTS) {
+        issues.push({
+          file: filePath,
+          type: "import-bottleneck",
+          severity: "critical",
+          metric: "import statements",
+          value: count,
+          limit: PERFORMANCE_LIMITS.CRITICAL_IMPORTS,
+        });
+      } else if (count >= PERFORMANCE_LIMITS.WARN_IMPORTS) {
+        issues.push({
+          file: filePath,
+          type: "import-bottleneck",
+          severity: "warning",
+          metric: "import statements",
+          value: count,
+          limit: PERFORMANCE_LIMITS.WARN_IMPORTS,
+        });
+      }
+    }
+
+    issues.sort((a, b) => {
+      const severityOrder = (s: PerformanceIssue["severity"]): number => (s === "critical" ? 0 : 1);
+      if (severityOrder(a.severity) !== severityOrder(b.severity)) {
+        return severityOrder(a.severity) - severityOrder(b.severity);
+      }
+      return b.value - a.value;
+    });
+
+    return issues;
+  }
+
+  private countImportsPerFile(
+    rootPath: string,
+    files: FileInfo[],
+    fileContents: Map<string, string>,
+  ): Map<string, number> {
+    const counts = new Map<string, number>();
+    const sourceExts = new Set([".ts", ".tsx", ".js", ".jsx", ".py", ".java", ".cs", ".go", ".rs"]);
+
+    for (const file of files) {
+      const ext = path.extname(file.path);
+      if (!sourceExts.has(ext)) {
+        continue;
+      }
+      const content = fileContents.get(file.path);
+      if (!content) {
+        continue;
+      }
+      const imports = this.extractImports(content);
+      counts.set(file.path, imports.length);
+    }
+    void rootPath;
+    return counts;
+  }
+
   private calculateCyclomaticComplexity(content: string): number {
     const decisionPoints = [
       /\bif\s*\(/g,
@@ -947,6 +1080,7 @@ export class AnalyzerEngine {
     largeAssets: LargeAsset[];
     duplicateCode: DuplicateCodeBlock[];
     complexity: ComplexityMetrics[];
+    performanceIssues: PerformanceIssue[];
   }): string[] {
     const recommendations: string[] = [];
 
@@ -1016,6 +1150,11 @@ export class AnalyzerEngine {
     if (highComplexity.length > 0) {
       recommendations.push(
         `Simplify ${highComplexity.length} overly complex function(s) with cyclomatic complexity above 15`,
+      );
+    }
+    if (config.performanceIssues.length > 0) {
+      recommendations.push(
+        `Address ${config.performanceIssues.length} performance issue(s) — split large files, reduce import fan-in, or refactor high-complexity functions`,
       );
     }
 

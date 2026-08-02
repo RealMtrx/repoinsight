@@ -25,7 +25,7 @@ milestone and are subject to change based on community feedback and maintainer a
 - [x] **Offline vulnerability lookup** — Local database of known vulnerabilities
 - [x] **GitHub Actions annotations** — PR comment annotations from analysis
 - [x] **`.repoinsightignore` file** — Per-project exclusion patterns
-- [ ] **Performance profiling** — Detect slow functions, large bundles, import bottlenecks
+- [x] **Performance profiling** — Detect large files, high cyclomatic complexity, import bottlenecks
 - [ ] **Monorepo-aware analysis** — Analyze individual packages within monorepos
 
 ## v2.0 — Future

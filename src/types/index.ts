@@ -158,6 +158,15 @@ export interface ComplexityMetrics {
   maxNestingDepth: number;
 }
 
+export interface PerformanceIssue {
+  file: string;
+  type: "high-complexity" | "large-file" | "import-bottleneck";
+  severity: "warning" | "critical";
+  metric: string;
+  value: number;
+  limit: number;
+}
+
 export type PackageManager = "npm" | "pnpm" | "yarn" | "bun";
 export type MonorepoTool = "turborepo" | "nx" | "lerna" | "workspaces";
 export type CiProvider =
@@ -262,6 +271,7 @@ export interface AnalysisReport {
   envFiles: string[];
   duplicateCode: DuplicateCodeBlock[];
   complexity: ComplexityMetrics[];
+  performanceIssues: PerformanceIssue[];
   missingReadme: boolean;
   missingLicense: boolean;
   missingGitignore: boolean;

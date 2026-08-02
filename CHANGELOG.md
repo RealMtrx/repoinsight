@@ -27,6 +27,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   output cap, and severity filtering
 - **Configurable rule sets** — Custom severity thresholds (`scoreThresholds` for
   excellent/good/fair/ poor) in config files, applied consistently via `getScoreStatus()`
+- **Performance profiling** — analysis now surfaces `PerformanceIssue` entries for large source
+  files (500/1000 non-empty lines), high cyclomatic complexity (10/15), and import bottlenecks
+  (15/30 import statements), driven by `PERFORMANCE_LIMITS` in constants; findings are counted in
+  the report summary, penalized in the performance score, rendered in all three reporters, and
+  referenced by a recommendation
+- **3 new tests** for performance-issue scoring, reporter rendering, and analyzer output
 - **`.repoinsightignore` support** — Per-project exclusion patterns in gitignore style, merged with
   `excludePatterns` from config files
 - **Config file loading** — `loadConfig()` now actually reads configuration from disk, honoring the

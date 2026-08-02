@@ -258,6 +258,16 @@ export class HtmlReporter {
         );
       }
     }
+    if (report.performanceIssues.length) {
+      p.push(
+        `<h3 style="margin:16px 0 8px">Performance <span class="badge" style="background:${C.warning}22;color:${C.warning}">${report.performanceIssues.length}</span></h3>`,
+      );
+      for (const perf of report.performanceIssues.slice(0, 15)) {
+        p.push(
+          `<div class="issue ${perf.severity === "critical" ? "issue-crit" : "issue-warn"}"><strong>${this.esc(perf.file)}</strong> — ${perf.type} (${perf.value}, limit ${perf.limit})</div>`,
+        );
+      }
+    }
     if (report.circularImports.length) {
       p.push(
         `<h3 style="margin:16px 0 8px">Circular Imports <span class="badge" style="background:${C.error}22;color:${C.error}">${report.circularImports.length}</span></h3>`,

@@ -242,6 +242,17 @@ export class MarkdownReporter {
         );
       }
     }
+    if (r.performanceIssues.length) {
+      p.push("### ⚡ Performance Findings\n");
+      p.push(
+        "| File | Issue | Value | Limit | Severity |\n|------|-------|-------|-------|----------|",
+      );
+      for (const perf of r.performanceIssues.slice(0, 15)) {
+        p.push(
+          `| ${perf.file} | ${perf.type} | ${perf.value} | ${perf.limit} | ${perf.severity} |`,
+        );
+      }
+    }
     if (r.circularImports.length) {
       p.push("### 🔄 Circular Imports\n");
       p.push("| File | Chain |\n|------|-------|");

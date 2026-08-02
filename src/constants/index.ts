@@ -189,6 +189,15 @@ export const SCORE_THRESHOLDS_DEFAULT = {
   poor: 40,
 } as const;
 
+export const PERFORMANCE_LIMITS = {
+  WARN_COMPLEXITY: 10,
+  CRITICAL_COMPLEXITY: 15,
+  WARN_FILE_LINES: 500,
+  CRITICAL_FILE_LINES: 1000,
+  WARN_IMPORTS: 15,
+  CRITICAL_IMPORTS: 30,
+} as const;
+
 export const INDICATORS = {
   pass: "\u2713",
   warn: "\u26A0",
