@@ -19,42 +19,27 @@ export function StatsView({ report }: StatsViewProps) {
         width={52}
       >
         <Text bold color="#D4A017">
-          {" "}Stats{" "}
+          {" "}
+          Stats{" "}
         </Text>
         <Text>
-          <Text color="#8D99AE">Target  </Text>
-          <Text color="#D4A017">{scopeIcon(report.scope.type)} {scopeLabel(report.scope.type)}</Text>
+          <Text color="#8D99AE">Target </Text>
+          <Text color="#D4A017">
+            {scopeIcon(report.scope.type)} {scopeLabel(report.scope.type)}
+          </Text>
         </Text>
         <Text>
-          <Text color="#8D99AE">Path    </Text>
+          <Text color="#8D99AE">Path </Text>
           <Text color="#64B5F6">{report.scope.targetPath}</Text>
         </Text>
-        <DataRow
-          label="Files"
-          value={String(report.fileCount)}
-          color="#E76F51"
-        />
+        <DataRow label="Files" value={String(report.fileCount)} color="#E76F51" />
         <DataRow
           label="Score"
           value={`${report.score}/100`}
-          color={
-            report.score >= 80
-              ? "#52B788"
-              : report.score >= 60
-                ? "#F4A261"
-                : "#E63946"
-          }
+          color={report.score >= 80 ? "#52B788" : report.score >= 60 ? "#F4A261" : "#E63946"}
         />
-        <DataRow
-          label="Duration"
-          value={formatDuration(report.duration)}
-          color="#4895EF"
-        />
-        <DataRow
-          label="Languages"
-          value={String(report.languages.length)}
-          color="#D4A017"
-        />
+        <DataRow label="Duration" value={formatDuration(report.duration)} color="#4895EF" />
+        <DataRow label="Languages" value={String(report.languages.length)} color="#D4A017" />
         {report.gitStats && (
           <>
             <DataRow
@@ -83,15 +68,7 @@ export function StatsView({ report }: StatsViewProps) {
   );
 }
 
-function DataRow({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: string;
-  color: string;
-}) {
+function DataRow({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <Text>
       <Text color="#8D99AE">{label.padEnd(14)}</Text>

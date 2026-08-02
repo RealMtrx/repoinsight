@@ -20,11 +20,7 @@ function formatTime(seconds: number): string {
   return `${String(mm).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-export function MultiProgressView({
-  targets,
-  onComplete,
-  onError,
-}: MultiProgressViewProps) {
+export function MultiProgressView({ targets, onComplete, onError }: MultiProgressViewProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [results, setResults] = useState<MultiAnalysisResult[]>([]);
   const [elapsed, setElapsed] = useState(0);
@@ -47,10 +43,14 @@ export function MultiProgressView({
       const accumulated: MultiAnalysisResult[] = [];
 
       for (let i = 0; i < targets.length; i++) {
-        if (!runningRef.current || cancelled) { break; }
+        if (!runningRef.current || cancelled) {
+          break;
+        }
         setCurrentIndex(i);
         const target = targets[i];
-        if (!target?.enabled) { continue; }
+        if (!target?.enabled) {
+          continue;
+        }
 
         try {
           const mod = await import("../core/analyzer.js");
@@ -59,7 +59,9 @@ export function MultiProgressView({
             scopeType: target.type,
             targetPath: target.path,
           });
-          if (!runningRef.current || cancelled) { break; }
+          if (!runningRef.current || cancelled) {
+            break;
+          }
           const result: MultiAnalysisResult = {
             path: target.path,
             type: target.type,
@@ -70,7 +72,9 @@ export function MultiProgressView({
           resultsRef.current = accumulated;
           setResults([...accumulated]);
         } catch (err) {
-          if (!runningRef.current || cancelled) { break; }
+          if (!runningRef.current || cancelled) {
+            break;
+          }
           const result: MultiAnalysisResult = {
             path: target.path,
             type: target.type,
@@ -94,7 +98,9 @@ export function MultiProgressView({
       }
     });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const completedCount = results.length;
@@ -126,16 +132,16 @@ export function MultiProgressView({
 
       <Box marginTop={1} flexDirection="column" alignItems="center">
         <Text>
-          <Text color="#8D99AE">Remaining  </Text>
+          <Text color="#8D99AE">Remaining </Text>
           <Text color={remaining > 0 ? "#F4A261" : "#52B788"}>{remaining}</Text>
         </Text>
         <Text>
-          <Text color="#8D99AE">Elapsed    </Text>
+          <Text color="#8D99AE">Elapsed </Text>
           <Text color="#64B5F6">{formatTime(elapsed)}</Text>
         </Text>
         {scanning && eta > 0 && (
           <Text>
-            <Text color="#8D99AE">ETA        </Text>
+            <Text color="#8D99AE">ETA </Text>
             <Text color="#64B5F6">{formatTime(eta)}</Text>
           </Text>
         )}
@@ -143,12 +149,10 @@ export function MultiProgressView({
 
       {results.length > 0 && (
         <Box marginTop={2} flexDirection="column" width={60}>
-          <Text color="#6C757D">  Results so far:</Text>
+          <Text color="#6C757D"> Results so far:</Text>
           {results.map((r, i) => (
             <Text key={i}>
-              <Text color={r.error ? "#E63946" : "#52B788"}>
-                {r.error ? "✗" : "✓"}
-              </Text>
+              <Text color={r.error ? "#E63946" : "#52B788"}>{r.error ? "✗" : "✓"}</Text>
               <Text color="#8D99AE"> {scopeIcon(r.type)} </Text>
               <Text color={r.error ? "#E63946" : "#8D99AE"}>
                 {r.name || r.path.split(/[\\/]/).pop()}

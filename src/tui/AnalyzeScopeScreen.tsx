@@ -13,7 +13,11 @@ type Mode = "menu" | "confirm-entire";
 
 const OPTIONS = [
   { id: "entire-pc", label: "Entire Computer", description: "Scan all drives and mounted volumes" },
-  { id: "custom-paths", label: "Custom Paths", description: "Choose specific folders and repositories" },
+  {
+    id: "custom-paths",
+    label: "Custom Paths",
+    description: "Choose specific folders and repositories",
+  },
 ] as const;
 
 export function AnalyzeScopeScreen({
@@ -66,12 +70,13 @@ export function AnalyzeScopeScreen({
   if (mode === "confirm-entire") {
     return (
       <Box flexDirection="column" paddingX={2} alignItems="center" paddingY={4}>
-        <Text color="#F4A261" bold>⚠ Scanning Entire Computer</Text>
+        <Text color="#F4A261" bold>
+          ⚠ Scanning Entire Computer
+        </Text>
         <Box marginTop={1} width={56}>
           <Text color="#8D99AE">
-            This will scan all connected drives and mounted volumes. Depending on
-            the size of your drives, this may take a very long time and consume
-            significant system resources.
+            This will scan all connected drives and mounted volumes. Depending on the size of your
+            drives, this may take a very long time and consume significant system resources.
           </Text>
         </Box>
         {drives.length > 0 && (
@@ -86,7 +91,7 @@ export function AnalyzeScopeScreen({
         </Box>
         <Box marginTop={1}>
           <Text color="#D4A017">Enter Continue</Text>
-          <Text color="#6C757D">  ·  </Text>
+          <Text color="#6C757D"> · </Text>
           <Text color="#8D99AE">Esc Cancel</Text>
         </Box>
       </Box>
@@ -106,7 +111,8 @@ export function AnalyzeScopeScreen({
         width={60}
       >
         <Text bold color="#D4A017">
-          {" "}Analyze Scope{" "}
+          {" "}
+          Analyze Scope{" "}
         </Text>
         <Box marginTop={1} flexDirection="column">
           {OPTIONS.map((opt, i) => (

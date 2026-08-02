@@ -1,10 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  formatFileSize,
-  countLines,
-  isBinaryFile,
-  mapLimit,
-} from "../../src/utils/file.js";
+import { formatFileSize, countLines, isBinaryFile, mapLimit } from "../../src/utils/file.js";
 
 describe("formatFileSize", () => {
   it("formats bytes", () => {

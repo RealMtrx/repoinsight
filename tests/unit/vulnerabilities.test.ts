@@ -34,7 +34,10 @@ describe("scanForVulnerabilities", () => {
 
   it("uses installed version from package-lock.json when present", async () => {
     dir = mkdtempSync(join(tmpdir(), "vuln-test-"));
-    writeFileSync(join(dir, "package.json"), JSON.stringify({ dependencies: { minimist: "^1.2.0" } }));
+    writeFileSync(
+      join(dir, "package.json"),
+      JSON.stringify({ dependencies: { minimist: "^1.2.0" } }),
+    );
     writeFileSync(
       join(dir, "package-lock.json"),
       JSON.stringify({
@@ -51,7 +54,10 @@ describe("scanForVulnerabilities", () => {
 
   it("does not flag patched versions from lock file", async () => {
     dir = mkdtempSync(join(tmpdir(), "vuln-test-"));
-    writeFileSync(join(dir, "package.json"), JSON.stringify({ dependencies: { semver: "^7.5.2" } }));
+    writeFileSync(
+      join(dir, "package.json"),
+      JSON.stringify({ dependencies: { semver: "^7.5.2" } }),
+    );
     writeFileSync(
       join(dir, "package-lock.json"),
       JSON.stringify({

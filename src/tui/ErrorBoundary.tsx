@@ -26,7 +26,8 @@ export class TUIErrorBoundary extends Component<Props, State> {
       return (
         <Box flexDirection="column" padding={2}>
           <Text color="#E63946" bold>
-            {" "}◐ TUI Error{" "}
+            {" "}
+            ◐ TUI Error{" "}
           </Text>
           <Box marginTop={1}>
             <Text color="#8D99AE">
@@ -34,9 +35,7 @@ export class TUIErrorBoundary extends Component<Props, State> {
             </Text>
           </Box>
           <Box marginTop={1}>
-            <Text color="#6C757D">
-              Press Ctrl+C to exit, then run with --debug for details
-            </Text>
+            <Text color="#6C757D">Press Ctrl+C to exit, then run with --debug for details</Text>
           </Box>
         </Box>
       );

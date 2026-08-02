@@ -91,7 +91,9 @@ function createMockReport(overrides?: Partial<AnalysisReport>): AnalysisReport {
 describe("annotations", () => {
   it("emits error for hardcoded secrets with file and line", () => {
     const report = createMockReport({
-      hardcodedSecrets: [{ file: "/workspace/config.ts", line: 5, type: "aws-key", context: "AKIA..." }],
+      hardcodedSecrets: [
+        { file: "/workspace/config.ts", line: 5, type: "aws-key", context: "AKIA..." },
+      ],
     });
     const result = generateAnnotations(report, "/workspace");
     expect(result).toContainEqual(

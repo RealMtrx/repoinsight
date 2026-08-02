@@ -2,7 +2,12 @@ import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import { mkdirSync, writeFileSync, mkdtempSync, rmSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
-import { loadConfig, getConfig, getScoreWeights, getScoreThresholds } from "../../src/config/index.js";
+import {
+  loadConfig,
+  getConfig,
+  getScoreWeights,
+  getScoreThresholds,
+} from "../../src/config/index.js";
 import { SCORE_WEIGHTS_DEFAULT, SCORE_THRESHOLDS_DEFAULT } from "../../src/constants/index.js";
 
 describe("config", () => {
@@ -98,7 +103,10 @@ describe("config file loading", () => {
   });
 
   it("loads config from package.json repoinsight key when no dedicated file exists", () => {
-    const dir = makeConfigDir({ repoinsight: { excludePatterns: ["pkg-only/**"] } }, "package.json");
+    const dir = makeConfigDir(
+      { repoinsight: { excludePatterns: ["pkg-only/**"] } },
+      "package.json",
+    );
     const config = loadConfig(undefined, dir);
     expect(config.excludePatterns).toEqual(["pkg-only/**"]);
   });

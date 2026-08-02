@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { calculateScore, calculateCategoryScores, getScoreStatus } from "../../src/utils/scoring.js";
+import {
+  calculateScore,
+  calculateCategoryScores,
+  getScoreStatus,
+} from "../../src/utils/scoring.js";
 import type { AnalysisReport } from "../../src/types/index.js";
 import { loadConfig } from "../../src/config/index.js";
 

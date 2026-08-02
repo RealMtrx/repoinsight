@@ -53,18 +53,19 @@ export function Dashboard({
         width={68}
       >
         <Text bold color="#2A9D8F">
-          {" "}Analysis Target{" "}
+          {" "}
+          Analysis Target{" "}
         </Text>
         <Text>
-          <Text color="#8D99AE">  Type    </Text>
-          <Text color="#D4A017">{scopeIcon(scope.type)} {scopeLabel(scope.type)}</Text>
+          <Text color="#8D99AE"> Type </Text>
+          <Text color="#D4A017">
+            {scopeIcon(scope.type)} {scopeLabel(scope.type)}
+          </Text>
         </Text>
         <Text>
-          <Text color="#8D99AE">  Path    </Text>
+          <Text color="#8D99AE"> Path </Text>
           <Text color="#64B5F6" bold>
-            {scope.targetPath.length > 50
-              ? "..." + scope.targetPath.slice(-47)
-              : scope.targetPath}
+            {scope.targetPath.length > 50 ? "..." + scope.targetPath.slice(-47) : scope.targetPath}
           </Text>
         </Text>
       </Box>
@@ -78,15 +79,12 @@ export function Dashboard({
         width={68}
       >
         <Text bold color="#4895EF">
-          {" "}Repository{" "}
+          {" "}
+          Repository{" "}
         </Text>
         <DataRow
           label="Directory"
-          value={
-            directory.length > 50
-              ? "..." + directory.slice(-47)
-              : directory
-          }
+          value={directory.length > 50 ? "..." + directory.slice(-47) : directory}
           color="#64B5F6"
         />
         <DataRow
@@ -99,33 +97,19 @@ export function Dashboard({
             label="Package"
             value={
               tech.packageManager +
-              (tech.packageManagerVersion
-                ? ` ${tech.packageManagerVersion}`
-                : "")
+              (tech.packageManagerVersion ? ` ${tech.packageManagerVersion}` : "")
             }
             color="#D4A017"
           />
         )}
         {tech?.frameworks.length ? (
-          <DataRow
-            label="Framework"
-            value={tech.frameworks.join(", ")}
-            color="#4895EF"
-          />
+          <DataRow label="Framework" value={tech.frameworks.join(", ")} color="#4895EF" />
         ) : null}
         {tech?.testFrameworks.length ? (
-          <DataRow
-            label="Testing"
-            value={tech.testFrameworks.join(", ")}
-            color="#F4A261"
-          />
+          <DataRow label="Testing" value={tech.testFrameworks.join(", ")} color="#F4A261" />
         ) : null}
         {tech?.ciProviders.length ? (
-          <DataRow
-            label="CI/CD"
-            value={tech.ciProviders.join(", ")}
-            color="#E63946"
-          />
+          <DataRow label="CI/CD" value={tech.ciProviders.join(", ")} color="#E63946" />
         ) : null}
       </Box>
 
@@ -139,21 +123,44 @@ export function Dashboard({
           width={68}
         >
           <Text bold color="#D4A017">
-            {" "}Overview{" "}
+            {" "}
+            Overview{" "}
           </Text>
           {(() => {
             const items: string[] = [];
-            if (tech.hasReadme) { items.push("README"); }
-            if (tech.hasLicense) { items.push("LICENSE"); }
-            if (tech.hasSecurity) { items.push("SECURITY"); }
-            if (tech.hasContributing) { items.push("CONTRIBUTING"); }
-            if (tech.docker) { items.push("Docker"); }
-            if (tech.changesets) { items.push("changesets"); }
-            if (tech.workspaces) { items.push("workspaces"); }
-            if (tech.typescript) { items.push("TypeScript"); }
-            if (tech.monorepo) { items.push(`Monorepo (${tech.monorepo})`); }
-            if (tech.nodeVersion) { items.push(`Node ${tech.nodeVersion}`); }
-            if (items.length === 0) { return <Text color="#8D99AE">  — No detected features</Text>; }
+            if (tech.hasReadme) {
+              items.push("README");
+            }
+            if (tech.hasLicense) {
+              items.push("LICENSE");
+            }
+            if (tech.hasSecurity) {
+              items.push("SECURITY");
+            }
+            if (tech.hasContributing) {
+              items.push("CONTRIBUTING");
+            }
+            if (tech.docker) {
+              items.push("Docker");
+            }
+            if (tech.changesets) {
+              items.push("changesets");
+            }
+            if (tech.workspaces) {
+              items.push("workspaces");
+            }
+            if (tech.typescript) {
+              items.push("TypeScript");
+            }
+            if (tech.monorepo) {
+              items.push(`Monorepo (${tech.monorepo})`);
+            }
+            if (tech.nodeVersion) {
+              items.push(`Node ${tech.nodeVersion}`);
+            }
+            if (items.length === 0) {
+              return <Text color="#8D99AE"> — No detected features</Text>;
+            }
             return (
               <Box flexDirection="row" flexWrap="wrap" gap={1}>
                 {items.map((item) => (
@@ -186,7 +193,8 @@ export function Dashboard({
         width={68}
       >
         <Text bold color="#8D99AE">
-          {" "}Actions{" "}
+          {" "}
+          Actions{" "}
         </Text>
         {(() => {
           let currentCategory = "";
@@ -194,7 +202,9 @@ export function Dashboard({
 
           for (let i = 0; i < menuItems.length; i++) {
             const item = menuItems[i];
-            if (!item) { continue; }
+            if (!item) {
+              continue;
+            }
 
             if (item.category !== currentCategory) {
               currentCategory = item.category;
@@ -211,10 +221,7 @@ export function Dashboard({
                 <Text color={isSelected ? "#D4A017" : "transparent"}>
                   {isSelected ? "▸ " : "  "}
                 </Text>
-                <Text
-                  color={isSelected ? "#D4A017" : "#8D99AE"}
-                  bold={isSelected}
-                >
+                <Text color={isSelected ? "#D4A017" : "#8D99AE"} bold={isSelected}>
                   {item.label.padEnd(16)}
                 </Text>
                 <Text color="#6C757D"> {item.description}</Text>
@@ -228,26 +235,16 @@ export function Dashboard({
 
       <Box justifyContent="space-between" width={68}>
         <Text color="#6C757D">◈ repoinsight</Text>
-        <Text color="#8D99AE">
-          ↑↓ · Enter · Ctrl+K · R · Q
-        </Text>
+        <Text color="#8D99AE">↑↓ · Enter · Ctrl+K · R · Q</Text>
       </Box>
     </Box>
   );
 }
 
-function DataRow({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: string;
-  color: string;
-}) {
+function DataRow({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <Text>
-      <Text color="#8D99AE">  {label.padEnd(16)}</Text>
+      <Text color="#8D99AE"> {label.padEnd(16)}</Text>
       <Text color={color}>{value}</Text>
     </Text>
   );

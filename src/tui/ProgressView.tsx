@@ -49,7 +49,10 @@ export function ProgressView({ scope }: ProgressViewProps) {
         <Text color="#3D405B">{"─".repeat(after)}</Text>
       </Box>
       <Box marginTop={1}>
-        <Text color="#8D99AE">{PHASES[phaseIndex]}{dots}</Text>
+        <Text color="#8D99AE">
+          {PHASES[phaseIndex]}
+          {dots}
+        </Text>
       </Box>
       <Box marginTop={1}>
         <Text color="#6C757D">elapsed {elapsed}s</Text>

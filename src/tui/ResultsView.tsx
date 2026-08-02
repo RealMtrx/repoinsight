@@ -21,15 +21,7 @@ function ScoreColor({ score }: { score: number }) {
   return <Text color={color}>{score}/100</Text>;
 }
 
-function IssueLine({
-  label,
-  count,
-  color,
-}: {
-  label: string;
-  count: number;
-  color: string;
-}) {
+function IssueLine({ label, count, color }: { label: string; count: number; color: string }) {
   const has = count > 0;
   return (
     <Text>
@@ -80,19 +72,21 @@ function SummarySection({ report }: { report: AnalysisReport }) {
   return (
     <Box flexDirection="column">
       <Text>
-        <Text color="#8D99AE">Target:   </Text>
-        <Text color="#D4A017">{scopeIcon(report.scope.type)} {scopeLabel(report.scope.type)}</Text>
+        <Text color="#8D99AE">Target: </Text>
+        <Text color="#D4A017">
+          {scopeIcon(report.scope.type)} {scopeLabel(report.scope.type)}
+        </Text>
       </Text>
       <Text>
-        <Text color="#8D99AE">Path:     </Text>
+        <Text color="#8D99AE">Path: </Text>
         <Text color="#64B5F6">{report.scope.targetPath}</Text>
       </Text>
       <Text>
-        <Text color="#8D99AE">Score:    </Text>
+        <Text color="#8D99AE">Score: </Text>
         <ScoreColor score={report.score} />
       </Text>
       <Text>
-        <Text color="#8D99AE">Files:    </Text>
+        <Text color="#8D99AE">Files: </Text>
         <Text color="#E76F51">{report.fileCount}</Text>
       </Text>
       <Text>
@@ -100,18 +94,18 @@ function SummarySection({ report }: { report: AnalysisReport }) {
         <Text color="#E76F51">{formatDuration(report.duration)}</Text>
       </Text>
       <Text>
-        <Text color="#8D99AE">Size:     </Text>
+        <Text color="#8D99AE">Size: </Text>
         <Text color="#E76F51">{formatSize(report.projectSize)}</Text>
       </Text>
       <Text>
-        <Text color="#8D99AE">Git:      </Text>
+        <Text color="#8D99AE">Git: </Text>
         <Text color={report.gitStats ? "#52B788" : "#8D99AE"}>
           {report.gitStats ? "✓ active" : "—"}
         </Text>
       </Text>
       {report.licenseName || report.licenseSpdx ? (
         <Text>
-          <Text color="#8D99AE">License:  </Text>
+          <Text color="#8D99AE">License: </Text>
           <Text color="#52B788">{report.licenseSpdx ?? report.licenseName}</Text>
         </Text>
       ) : null}
@@ -120,21 +114,9 @@ function SummarySection({ report }: { report: AnalysisReport }) {
         <Text color="#E76F51"> {report.languages.length}</Text>
       </Text>
       <Box marginTop={1} flexDirection="column">
-        <IssueLine
-          label="Secrets"
-          count={report.hardcodedSecrets.length}
-          color="#E63946"
-        />
-        <IssueLine
-          label="TODO Items"
-          count={report.todoComments.length}
-          color="#F4A261"
-        />
-        <IssueLine
-          label="Circular Imports"
-          count={report.circularImports.length}
-          color="#F4A261"
-        />
+        <IssueLine label="Secrets" count={report.hardcodedSecrets.length} color="#E63946" />
+        <IssueLine label="TODO Items" count={report.todoComments.length} color="#F4A261" />
+        <IssueLine label="Circular Imports" count={report.circularImports.length} color="#F4A261" />
         <IssueLine
           label="Dependency Issues"
           count={report.dependencyIssues.length}
@@ -145,21 +127,9 @@ function SummarySection({ report }: { report: AnalysisReport }) {
           count={report.duplicateFileNames.length}
           color="#4895EF"
         />
-        <IssueLine
-          label="Missing README"
-          count={report.missingReadme ? 1 : 0}
-          color="#F4A261"
-        />
-        <IssueLine
-          label="Missing License"
-          count={report.missingLicense ? 1 : 0}
-          color="#F4A261"
-        />
-        <IssueLine
-          label="Missing Tests"
-          count={report.missingTests ? 1 : 0}
-          color="#F4A261"
-        />
+        <IssueLine label="Missing README" count={report.missingReadme ? 1 : 0} color="#F4A261" />
+        <IssueLine label="Missing License" count={report.missingLicense ? 1 : 0} color="#F4A261" />
+        <IssueLine label="Missing Tests" count={report.missingTests ? 1 : 0} color="#F4A261" />
       </Box>
     </Box>
   );
@@ -199,16 +169,36 @@ function TechSection({ report }: { report: AnalysisReport }) {
   const tech = report.technologies;
   const items: Array<[string, string]> = [];
 
-  if (tech.packageManager) {items.push(["Package Manager", tech.packageManager]);}
-  if (tech.monorepo) {items.push(["Monorepo", tech.monorepo]);}
-  for (const f of tech.frameworks) {items.push(["Framework", f]);}
-  for (const t of tech.testFrameworks) {items.push(["Testing", t]);}
-  for (const l of tech.linters) {items.push(["Linter", l]);}
-  for (const c of tech.ciProviders) {items.push(["CI/CD", c]);}
-  if (tech.nodeVersion) {items.push(["Node", tech.nodeVersion]);}
-  if (tech.typescript) {items.push(["TypeScript", "✓"]);}
-  if (tech.docker) {items.push(["Docker", "✓ detected"]);}
-  for (const h of tech.gitHooks) {items.push(["Hooks", h]);}
+  if (tech.packageManager) {
+    items.push(["Package Manager", tech.packageManager]);
+  }
+  if (tech.monorepo) {
+    items.push(["Monorepo", tech.monorepo]);
+  }
+  for (const f of tech.frameworks) {
+    items.push(["Framework", f]);
+  }
+  for (const t of tech.testFrameworks) {
+    items.push(["Testing", t]);
+  }
+  for (const l of tech.linters) {
+    items.push(["Linter", l]);
+  }
+  for (const c of tech.ciProviders) {
+    items.push(["CI/CD", c]);
+  }
+  if (tech.nodeVersion) {
+    items.push(["Node", tech.nodeVersion]);
+  }
+  if (tech.typescript) {
+    items.push(["TypeScript", "✓"]);
+  }
+  if (tech.docker) {
+    items.push(["Docker", "✓ detected"]);
+  }
+  for (const h of tech.gitHooks) {
+    items.push(["Hooks", h]);
+  }
 
   return (
     <Box flexDirection="column">
@@ -216,7 +206,8 @@ function TechSection({ report }: { report: AnalysisReport }) {
         <Text key={label}>
           <Text color="#8D99AE">{label.padEnd(16)}</Text>
           <Text color="#2A9D8F" bold>
-            {" "}{value}
+            {" "}
+            {value}
           </Text>
         </Text>
       ))}
@@ -234,7 +225,7 @@ function FilesSection({ report }: { report: AnalysisReport }) {
           </Text>
           {report.biggestFolders.slice(0, 5).map((f) => (
             <Text key={f.path}>
-              <Text>  ◇ </Text>
+              <Text> ◇ </Text>
               <Text color="#64B5F6" italic>
                 {f.path}
               </Text>
@@ -250,7 +241,7 @@ function FilesSection({ report }: { report: AnalysisReport }) {
           </Text>
           {report.biggestFiles.slice(0, 5).map((f) => (
             <Text key={f.path}>
-              <Text>  ◇ </Text>
+              <Text> ◇ </Text>
               <Text color="#64B5F6" italic>
                 {f.path}
               </Text>
@@ -261,11 +252,21 @@ function FilesSection({ report }: { report: AnalysisReport }) {
       )}
       {(() => {
         const missing: string[] = [];
-        if (report.missingReadme) {missing.push("README");}
-        if (report.missingLicense) {missing.push("LICENSE");}
-        if (report.missingGitignore) {missing.push(".gitignore");}
-        if (report.missingTests) {missing.push("Tests");}
-        if (report.missingCi) {missing.push("CI/CD");}
+        if (report.missingReadme) {
+          missing.push("README");
+        }
+        if (report.missingLicense) {
+          missing.push("LICENSE");
+        }
+        if (report.missingGitignore) {
+          missing.push(".gitignore");
+        }
+        if (report.missingTests) {
+          missing.push("Tests");
+        }
+        if (report.missingCi) {
+          missing.push("CI/CD");
+        }
         if (missing.length > 0) {
           return (
             <Box marginTop={1} flexDirection="column">
@@ -299,15 +300,16 @@ function RecsSection({ report }: { report: AnalysisReport }) {
 }
 
 function formatSize(bytes: number): string {
-  if (bytes < 1024) {return `${bytes} B`;}
-  if (bytes < 1_048_576) {return `${(bytes / 1024).toFixed(1)} KB`;}
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+  if (bytes < 1_048_576) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
   return `${(bytes / 1_048_576).toFixed(1)} MB`;
 }
 
-export function ResultsView({
-  report,
-  section,
-}: ResultsViewProps) {
+export function ResultsView({ report, section }: ResultsViewProps) {
   const sections: SectionDef[] = [
     { label: "Summary", icon: icons.diamond, render: (r) => <SummarySection report={r} /> },
     { label: "Score Breakdown", icon: icons.chart, render: (r) => <ScoresSection report={r} /> },
@@ -318,7 +320,9 @@ export function ResultsView({
   ];
 
   const current = sections[section];
-  if (!current) {return null;}
+  if (!current) {
+    return null;
+  }
 
   const totalSections = sections.length;
 
@@ -334,15 +338,12 @@ export function ResultsView({
         marginBottom={1}
       >
         <Text bold color="#2A9D8F">
-          {" "}Sections{" "}
+          {" "}
+          Sections{" "}
         </Text>
         <Box gap={1} flexWrap="wrap">
           {sections.map((s, i) => (
-            <Text
-              key={s.label}
-              color={i === section ? "#D4A017" : "#8D99AE"}
-              bold={i === section}
-            >
+            <Text key={s.label} color={i === section ? "#D4A017" : "#8D99AE"} bold={i === section}>
               {i === section ? `${icons.arrow} ` : "  "}
               {s.label}
             </Text>
@@ -358,20 +359,17 @@ export function ResultsView({
         marginBottom={1}
       >
         <Text bold color="#D4A017">
-          {" "}{current.icon} {current.label}{" "}
+          {" "}
+          {current.icon} {current.label}{" "}
         </Text>
         {current.render(report)}
       </Box>
       <Box justifyContent="space-between" width="100%">
-        <Text color="#6C757D">
-          ◈ {report.projectName ?? report.projectPath}
-        </Text>
+        <Text color="#6C757D">◈ {report.projectName ?? report.projectPath}</Text>
         <Text color="#8D99AE">
           {current.label} ({section + 1}/{totalSections})
         </Text>
-        <Text color="#6C757D">
-          ←→ Navigate · Q Back
-        </Text>
+        <Text color="#6C757D">←→ Navigate · Q Back</Text>
       </Box>
     </Box>
   );

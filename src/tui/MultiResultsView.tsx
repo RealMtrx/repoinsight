@@ -11,16 +11,28 @@ interface MultiResultsViewProps {
 }
 
 function scoreColor(score: number): string {
-  if (score >= 80) { return "#52B788"; }
-  if (score >= 60) { return "#F4A261"; }
+  if (score >= 80) {
+    return "#52B788";
+  }
+  if (score >= 60) {
+    return "#F4A261";
+  }
   return "#E63946";
 }
 
 function gradeLabel(score: number): string {
-  if (score >= 90) { return "A"; }
-  if (score >= 80) { return "B"; }
-  if (score >= 65) { return "C"; }
-  if (score >= 50) { return "D"; }
+  if (score >= 90) {
+    return "A";
+  }
+  if (score >= 80) {
+    return "B";
+  }
+  if (score >= 65) {
+    return "C";
+  }
+  if (score >= 50) {
+    return "D";
+  }
   return "F";
 }
 
@@ -28,10 +40,7 @@ function formatNumber(n: number): string {
   return n.toLocaleString();
 }
 
-export function MultiResultsView({
-  summary,
-  onBack,
-}: MultiResultsViewProps) {
+export function MultiResultsView({ summary, onBack }: MultiResultsViewProps) {
   const [showDetails, setShowDetails] = useState(false);
 
   useInput((_input, key) => {
@@ -44,11 +53,15 @@ export function MultiResultsView({
       return;
     }
     if (key.downArrow || key.rightArrow) {
-      if (!showDetails) { setShowDetails(true); }
+      if (!showDetails) {
+        setShowDetails(true);
+      }
       return;
     }
     if (key.upArrow || key.leftArrow) {
-      if (showDetails) { setShowDetails(false); }
+      if (showDetails) {
+        setShowDetails(false);
+      }
       return;
     }
   });
@@ -69,29 +82,33 @@ export function MultiResultsView({
               width={68}
             >
               <Text bold color={r.error ? "#E63946" : "#D4A017"}>
-                {" "}{scopeIcon(r.type)} {r.name || "Unknown"}
+                {" "}
+                {scopeIcon(r.type)} {r.name || "Unknown"}
               </Text>
               {r.error ? (
-                <Text color="#E63946">  ✗ {r.error}</Text>
+                <Text color="#E63946"> ✗ {r.error}</Text>
               ) : (
                 <>
                   <Text>
-                    <Text color="#8D99AE">  Score: </Text>
+                    <Text color="#8D99AE"> Score: </Text>
                     <Text color={scoreColor(r.report.score)}>{r.report.score}/100</Text>
                   </Text>
                   <Text>
-                    <Text color="#8D99AE">  Files: </Text>
+                    <Text color="#8D99AE"> Files: </Text>
                     <Text color="#E76F51">{formatNumber(r.report.fileCount)}</Text>
                   </Text>
                   <Text>
-                    <Text color="#8D99AE">  Duration: </Text>
+                    <Text color="#8D99AE"> Duration: </Text>
                     <Text color="#4895EF">{formatDuration(r.report.duration)}</Text>
                   </Text>
                   {r.report.languages.length > 0 && (
                     <Text>
-                      <Text color="#8D99AE">  Languages: </Text>
+                      <Text color="#8D99AE"> Languages: </Text>
                       <Text color="#D4A017">
-                        {r.report.languages.slice(0, 3).map((l) => l.language).join(", ")}
+                        {r.report.languages
+                          .slice(0, 3)
+                          .map((l) => l.language)
+                          .join(", ")}
                       </Text>
                     </Text>
                   )}
@@ -125,13 +142,14 @@ export function MultiResultsView({
         width={48}
       >
         <Text bold color="#D4A017">
-          {" "}Analysis Complete{" "}
+          {" "}
+          Analysis Complete{" "}
         </Text>
         <DataRow label="Repositories" value={formatNumber(summary.repositories)} color="#2A9D8F" />
         <DataRow label="Folders" value={formatNumber(summary.directories)} color="#4895EF" />
         <DataRow label="Total Files" value={formatNumber(summary.totalFiles)} color="#E76F51" />
         <Text>
-          <Text color="#8D99AE">  Average Health Score </Text>
+          <Text color="#8D99AE"> Average Health Score </Text>
           <Text bold color={scoreColor(avg)}>
             {gradeLabel(avg)}
           </Text>
@@ -148,11 +166,14 @@ export function MultiResultsView({
           width={48}
         >
           <Text bold color="#52B788">
-            {" "}Best Project{" "}
+            {" "}
+            Best Project{" "}
           </Text>
           <Text>
-            <Text color="#8D99AE">  </Text>
-            <Text color="#E2DCC8" bold>{best.name}</Text>
+            <Text color="#8D99AE"> </Text>
+            <Text color="#E2DCC8" bold>
+              {best.name}
+            </Text>
           </Text>
         </Box>
       )}
@@ -167,11 +188,14 @@ export function MultiResultsView({
           width={48}
         >
           <Text bold color="#F4A261">
-            {" "}Needs Attention{" "}
+            {" "}
+            Needs Attention{" "}
           </Text>
           <Text>
-            <Text color="#8D99AE">  </Text>
-            <Text color="#E2DCC8" bold>{worst.name}</Text>
+            <Text color="#8D99AE"> </Text>
+            <Text color="#E2DCC8" bold>
+              {worst.name}
+            </Text>
           </Text>
         </Box>
       )}
@@ -184,18 +208,10 @@ export function MultiResultsView({
   );
 }
 
-function DataRow({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: string;
-  color: string;
-}) {
+function DataRow({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <Text>
-      <Text color="#8D99AE">  {label.padEnd(16)}</Text>
+      <Text color="#8D99AE"> {label.padEnd(16)}</Text>
       <Text color={color}>{value}</Text>
     </Text>
   );

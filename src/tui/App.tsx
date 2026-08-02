@@ -98,90 +98,96 @@ export default function App() {
     setResultsSection(0);
   }, []);
 
-  const buildMultiSummary = useCallback(
-    (results: MultiAnalysisResult[]): MultiAnalysisSummary => {
-      const finished = results.filter((r) => r.report && !r.error);
-      const totalFiles = finished.reduce((s, r) => s + (r.report?.fileCount ?? 0), 0);
-      const repos = results.filter((r) => r.type === "repository").length;
-      const dirs = results.filter((r) => r.type === "directory").length;
-      const files = results.filter((r) => r.type === "file").length;
-      const scores = finished.map((r) => r.report?.score ?? 0).filter((s) => s > 0);
-      const avg = scores.length > 0
-        ? scores.reduce((a, b) => a + b, 0) / scores.length
-        : 0;
+  const buildMultiSummary = useCallback((results: MultiAnalysisResult[]): MultiAnalysisSummary => {
+    const finished = results.filter((r) => r.report && !r.error);
+    const totalFiles = finished.reduce((s, r) => s + (r.report?.fileCount ?? 0), 0);
+    const repos = results.filter((r) => r.type === "repository").length;
+    const dirs = results.filter((r) => r.type === "directory").length;
+    const files = results.filter((r) => r.type === "file").length;
+    const scores = finished.map((r) => r.report?.score ?? 0).filter((s) => s > 0);
+    const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
 
-      let best: MultiAnalysisSummary["bestProject"] = null;
-      let worst: MultiAnalysisSummary["worstProject"] = null;
-      for (const r of finished) {
-        if (!r.report) { continue; }
-        const name = r.name ?? r.path.split(/[\\/]/).pop() ?? r.path;
-        if (!best || (r.report.score ?? 0) > best.score) {
-          best = { name, score: r.report.score ?? 0 };
-        }
-        if (!worst || (r.report.score ?? 0) < worst.score) {
-          worst = { name, score: r.report.score ?? 0 };
-        }
+    let best: MultiAnalysisSummary["bestProject"] = null;
+    let worst: MultiAnalysisSummary["worstProject"] = null;
+    for (const r of finished) {
+      if (!r.report) {
+        continue;
       }
+      const name = r.name ?? r.path.split(/[\\/]/).pop() ?? r.path;
+      if (!best || (r.report.score ?? 0) > best.score) {
+        best = { name, score: r.report.score ?? 0 };
+      }
+      if (!worst || (r.report.score ?? 0) < worst.score) {
+        worst = { name, score: r.report.score ?? 0 };
+      }
+    }
 
-      return {
-        results,
-        totalTargets: results.length,
-        totalFiles,
-        repositories: repos,
-        directories: dirs,
-        files,
-        averageScore: Math.round(avg),
-        bestProject: best,
-        worstProject: worst && worst.name !== best?.name ? worst : null,
-      };
+    return {
+      results,
+      totalTargets: results.length,
+      totalFiles,
+      repositories: repos,
+      directories: dirs,
+      files,
+      averageScore: Math.round(avg),
+      bestProject: best,
+      worstProject: worst && worst.name !== best?.name ? worst : null,
+    };
+  }, []);
+
+  const runAnalysis = useCallback(
+    async (targetView: View, statusMsg: string) => {
+      setView("progress");
+      setIsRunning(true);
+      setStatusMessage(statusMsg);
+      const scope = detectTarget(directory);
+      setAnalysisScope(scope);
+      try {
+        const mod = await import("../core/analyzer.js");
+        const result = await mod.runAnalysis(directory, {
+          useCache: false,
+          scopeType: scope.type,
+          targetPath: scope.targetPath,
+        });
+        setReport(result);
+        setView(targetView);
+        setResultsSection(0);
+        setStatusMessage("Complete");
+      } catch {
+        setView("dashboard");
+        setStatusMessage(`${statusMsg} failed`);
+      } finally {
+        setIsRunning(false);
+      }
     },
-    [],
+    [directory],
   );
 
-  const runAnalysis = useCallback(async (targetView: View, statusMsg: string) => {
-    setView("progress");
-    setIsRunning(true);
-    setStatusMessage(statusMsg);
-    const scope = detectTarget(directory);
-    setAnalysisScope(scope);
-    try {
-      const mod = await import("../core/analyzer.js");
-      const result = await mod.runAnalysis(directory, {
-        useCache: false,
-        scopeType: scope.type,
-        targetPath: scope.targetPath,
-      });
-      setReport(result);
-      setView(targetView);
-      setResultsSection(0);
+  const executeCommand = useCallback(
+    async (id: string) => {
+      if (id === "report") {
+        await runAnalysis("results", "Analyzing...");
+      } else if (id === "stats") {
+        await runAnalysis("stats", "Gathering stats...");
+      } else if (id === "doctor" || id === "checkup") {
+        await runAnalysis("results", "Running diagnostics...");
+      } else if (id === "analyze" || id === "inspect") {
+        setView("analyze-scope");
+      }
+    },
+    [runAnalysis],
+  );
+
+  const handleMultiComplete = useCallback(
+    (results: MultiAnalysisResult[]) => {
+      const summary = buildMultiSummary(results);
+      setMultiResults(summary);
+      setView("multi-results");
       setStatusMessage("Complete");
-    } catch {
-      setView("dashboard");
-      setStatusMessage(`${statusMsg} failed`);
-    } finally {
       setIsRunning(false);
-    }
-  }, [directory]);
-
-  const executeCommand = useCallback(async (id: string) => {
-    if (id === "report") {
-      await runAnalysis("results", "Analyzing...");
-    } else if (id === "stats") {
-      await runAnalysis("stats", "Gathering stats...");
-    } else if (id === "doctor" || id === "checkup") {
-      await runAnalysis("results", "Running diagnostics...");
-    } else if (id === "analyze" || id === "inspect") {
-      setView("analyze-scope");
-    }
-  }, [runAnalysis]);
-
-  const handleMultiComplete = useCallback((results: MultiAnalysisResult[]) => {
-    const summary = buildMultiSummary(results);
-    setMultiResults(summary);
-    setView("multi-results");
-    setStatusMessage("Complete");
-    setIsRunning(false);
-  }, [buildMultiSummary]);
+    },
+    [buildMultiSummary],
+  );
 
   const handleMultiError = useCallback((error: string) => {
     setStatusMessage(`Analysis failed: ${error}`);
@@ -207,7 +213,9 @@ export default function App() {
 
   const startMultiAnalysis = useCallback(() => {
     const enabled = targets.filter((t) => t.enabled);
-    if (enabled.length === 0) { return; }
+    if (enabled.length === 0) {
+      return;
+    }
     setIsRunning(true);
     setView("multi-progress");
   }, [targets]);
@@ -224,18 +232,20 @@ export default function App() {
   }, []);
 
   const getFilteredPalette = useCallback(() => {
-    if (!paletteQuery) { return menuItems; }
+    if (!paletteQuery) {
+      return menuItems;
+    }
     const q = paletteQuery.toLowerCase();
     return menuItems.filter(
-      (item) =>
-        item.label.toLowerCase().includes(q) ||
-        item.description.toLowerCase().includes(q),
+      (item) => item.label.toLowerCase().includes(q) || item.description.toLowerCase().includes(q),
     );
   }, [paletteQuery]);
 
   useInput(
     (input, key) => {
-      if (isRunning) { return; }
+      if (isRunning) {
+        return;
+      }
 
       if (paletteVisible) {
         if (key.escape) {
@@ -311,7 +321,9 @@ export default function App() {
       if (view === "dashboard") {
         if (key.return) {
           const cmd = menuItems[menuIndex];
-          if (cmd) { void executeCommand(cmd.id); }
+          if (cmd) {
+            void executeCommand(cmd.id);
+          }
           return;
         }
         if (key.upArrow) {
@@ -429,9 +441,5 @@ export default function App() {
     }
   };
 
-  return (
-    <TUIErrorBoundary>
-      {renderView()}
-    </TUIErrorBoundary>
-  );
+  return <TUIErrorBoundary>{renderView()}</TUIErrorBoundary>;
 }

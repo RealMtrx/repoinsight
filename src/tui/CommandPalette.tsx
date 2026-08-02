@@ -9,11 +9,7 @@ interface CommandPaletteProps {
   onSelect: (id: string) => void;
 }
 
-export function CommandPalette({
-  items,
-  query,
-  selectedIndex,
-}: CommandPaletteProps) {
+export function CommandPalette({ items, query, selectedIndex }: CommandPaletteProps) {
   const filtered = !query
     ? items
     : items.filter(
@@ -33,24 +29,23 @@ export function CommandPalette({
       marginBottom={1}
     >
       <Text bold color="#E76F51">
-        {" "}Command Palette{" "}
+        {" "}
+        Command Palette{" "}
       </Text>
       <Box>
         <Text color="#D4A017">▸ </Text>
-        <Text color="#F4D03F">{query}<Text dimColor>█</Text></Text>
+        <Text color="#F4D03F">
+          {query}
+          <Text dimColor>█</Text>
+        </Text>
       </Box>
-      {filtered.length === 0 && (
-        <Text color="#8D99AE">No matching commands</Text>
-      )}
+      {filtered.length === 0 && <Text color="#8D99AE">No matching commands</Text>}
       {filtered.slice(0, maxItems).map((item, i) => (
         <Box key={item.id}>
           <Text color={i === selectedIndex ? "#D4A017" : "transparent"}>
             {i === selectedIndex ? "▸ " : "  "}
           </Text>
-          <Text
-            color={i === selectedIndex ? "#D4A017" : "#8D99AE"}
-            bold={i === selectedIndex}
-          >
+          <Text color={i === selectedIndex ? "#D4A017" : "#8D99AE"} bold={i === selectedIndex}>
             {item.label}
           </Text>
           <Text color="#6C757D"> {item.description}</Text>
